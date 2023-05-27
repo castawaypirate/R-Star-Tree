@@ -1,5 +1,14 @@
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Yo Yo Yo");
+        args = new String[1];
+        args[0]="2";
+        System.out.println("Let's go!");
+        if(args.length == 0){
+            System.out.println("You need to give the number of dimensions as an argument my fellow companion");
+        }else{
+            System.out.println("Dimensions : " + args[0]);
+            UserInterface ui = new UserInterface(args[0]);
+            ui.init();
+        }
     }
 }
