@@ -7,8 +7,8 @@ public class Main {
             System.out.println("You need to give the number of dimensions as an argument my fellow companion");
         }else{
             System.out.println("Dimensions : " + args[0]);
-            UserInterface ui = new UserInterface(args[0]);
-            ui.init();
+            UserInterface ui = new UserInterface();
+            ui.init(args[0]);
         }
     }
 }

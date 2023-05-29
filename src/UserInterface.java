@@ -1,18 +1,16 @@
 import java.util.Scanner;
 
 public class UserInterface {
-    private String dimensions = null;
-    public UserInterface(String dimensions){
-        this.dimensions = dimensions;
+    public UserInterface(){
     }
 
-    public void init(){
-        startUp();
+    public void init(String dimensions){
+        startUp(dimensions);
     }
 
-    private void startUp(){
+    private void startUp(String dimensions){
         System.out.println("Hello there!");
-        RAsteriskTree tree = new RAsteriskTree();
+        RAsteriskTree tree = new RAsteriskTree(Integer.parseInt(dimensions));
         Scanner sc = new Scanner(System.in);
         System.out.println("Type 1 for Bulk Loading");
         System.out.println("Type 2 to insert a record");

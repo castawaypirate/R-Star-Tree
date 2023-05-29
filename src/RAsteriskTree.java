@@ -1,7 +1,9 @@
 public class RAsteriskTree {
-    private FileManager fileManager = new FileManager();
-    public RAsteriskTree(){
-
+    private FileManager fileManager;
+    private int dimensions;
+    public RAsteriskTree(int dimensions){
+        this.dimensions=dimensions;
+        fileManager = new FileManager(dimensions);
     }
 
     public void bulkLoading(String CSVfilePath){

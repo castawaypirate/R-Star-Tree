@@ -1,6 +1,7 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Record {
+public class Record implements Serializable{
     private long id;
     private String name;
     private ArrayList<Double> coordinates;
