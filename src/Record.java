@@ -3,11 +3,12 @@ import java.util.ArrayList;
 
 public class Record implements Serializable{
     private long id;
+    private int blockId;
     private String name;
     private ArrayList<Double> coordinates;
     public Record(long id, String name, ArrayList<Double> coordinates){
-        this.id = id;
-        this.name = name;
+        this.id=id;
+        this.name=name;
         this.coordinates=coordinates;
     }
 
@@ -17,6 +18,14 @@ public class Record implements Serializable{
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getBlockId() {
+        return blockId;
+    }
+
+    public void setBlockId(int blockId) {
+        this.blockId = blockId;
     }
 
     public String getName() {
