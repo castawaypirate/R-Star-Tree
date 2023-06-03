@@ -8,6 +8,9 @@ public class Bounds {
         this.lowerBound=lowerBound;
     }
 
+    public Bounds() {
+    }
+
     public Double getUpperBound() {
         return upperBound;
     }

@@ -1,9 +1,9 @@
 public class LeafEntry extends Entry {
-    public long entryId;
+    public long recordId;
 
-    public LeafEntry(long entryId, BoundingBox boundingBox) {
+    public LeafEntry(long recordId, BoundingBox boundingBox) {
         super(boundingBox);
-        this.entryId = entryId;
+        this.recordId = recordId;
     }
 
     @Override
@@ -13,11 +13,11 @@ public class LeafEntry extends Entry {
 
     @Override
     public void showEntry() {
-        System.out.println("Entry ID:" + entryId);
+        System.out.println("Record ID:" + recordId);
         super.showEntry();
     }
 
     public long getEntryId() {
-        return entryId;
+        return recordId;
     }
 }

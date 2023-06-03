@@ -11,4 +11,17 @@ public class BoundingBox {
             System.out.println("Bounds in dimension " + (i+1) + ": " + bounds.get(i).getUpperBound() + ", " + bounds.get(i).getLowerBound());
         }
     }
+
+    public ArrayList<Bounds> getBounds() {
+        return bounds;
+    }
+
+    public double computeArea() {
+        Double area = 1.0;
+        for (Bounds bound : bounds) {
+            Double dimensionLength = bound.getUpperBound() - bound.getLowerBound();
+            area *= dimensionLength;
+        }
+        return area;
+    }
 }
