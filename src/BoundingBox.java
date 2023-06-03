@@ -24,4 +24,21 @@ public class BoundingBox {
         }
         return area;
     }
+
+    public Double computeOverlap(BoundingBox incomingBox) {
+        Double overlap = 1.0;
+        ArrayList<Bounds> incomingBoxBounds = incomingBox.getBounds();
+
+        for (int i = 0; i < bounds.size(); i++) {
+            Double lower1 = bounds.get(i).getLowerBound();
+            Double upper1 = bounds.get(i).getUpperBound();
+            Double lower2 = incomingBoxBounds.get(i).getLowerBound();
+            Double upper2 = incomingBoxBounds.get(i).getUpperBound();
+
+            Double intersectionLength = Math.max(0, Math.min(upper1, upper2) - Math.max(lower1, lower2));
+            overlap *= intersectionLength;
+        }
+
+        return overlap;
+    }
 }

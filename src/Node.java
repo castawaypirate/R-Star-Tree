@@ -1,11 +1,10 @@
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.*;
 
 public class Node {
     private ArrayList<Entry> entries;
     private int level;
     private boolean isRoot;
+    private Entry parentEntry;
 
     public Node(int level, boolean isRoot) {
         this.entries = new ArrayList<>();
@@ -13,23 +12,41 @@ public class Node {
         this.isRoot = isRoot;
     }
 
+    public ArrayList<Entry> getEntries() {
+        return entries;
+    }
+
+    public void setEntries(ArrayList<Entry> entries) {
+        this.entries = entries;
+    }
+
     public int getLevel() {
         return level;
     }
 
-    public ArrayList<Entry> getEntries() {
-        return entries;
+    public void setLevel(int level) {
+        this.level = level;
     }
 
     public void addEntry(Entry entry) {
         entries.add(entry);
     }
 
+    public void showEntries() {
+        for(Entry entry : entries) {
+            entry.showEntry();
+        }
+    }
+
+    public boolean isRoot() {
+        return isRoot;
+    }
+
     public void changeRootStatus(boolean isRoot) {
         this.isRoot = isRoot;
     }
 
-    public boolean hasLeaves () {
+    public boolean hasLeaves() {
         if (entries.size()>0) {
             if (entries.get(entries.size()-1) instanceof LeafEntry) {
                 return true;
@@ -38,29 +55,99 @@ public class Node {
         return false;
     }
 
-    public ArrayList<Entry> sortEntriesByAreaEnlargement (Entry incomingEntry) {
-        ArrayList<Entry> sortedEntries = new ArrayList<>();
+    public Entry getParentEntry() {
+        return parentEntry;
+    }
 
+    public void setParentEntry(Entry parentEntry) {
+        this.parentEntry = parentEntry;
+    }
+
+    public Entry getEntryWithTheLeastAreaEnlargement(Entry incomingEntry, ArrayList<Entry> entriesToSort) {
         // Compute and store the areas of different bounding boxes
-        ArrayList<Double> areasOfDifferentBoundingBoxes = new ArrayList<>();
-        for (Entry entry : entries) {
-            BoundingBox assumedBoundingBox = entry.assumingBoundingBox(incomingEntry);
-            double area = assumedBoundingBox.computeArea();
-            areasOfDifferentBoundingBoxes.add(area);
+        HashMap<Integer, Double> areasOfDifferentBoundingBoxes = new HashMap<>();
+        for (int i = 0; i < entriesToSort.size(); i++) {
+            BoundingBox assumedBoundingBox = entriesToSort.get(i).assumingBoundingBox(incomingEntry);
+            Double area = assumedBoundingBox.computeArea();
+            areasOfDifferentBoundingBoxes.put(i, area);
         }
 
-        // Sort the entries based on the areas of their assumed bounding boxes
-        Collections.sort(entries, new Comparator<Entry>() {
+        // Convert the HashMap to a list of entries
+        List<Map.Entry<Integer, Double>> entryList = new ArrayList<>(areasOfDifferentBoundingBoxes.entrySet());
+        // Sort the list based on the values (areas)
+        Collections.sort(entryList, new Comparator<Map.Entry<Integer, Double>>() {
             @Override
-            public int compare(Entry entry1, Entry entry2) {
-                int index1 = entries.indexOf(entry1);
-                int index2 = entries.indexOf(entry2);
-                double area1 = areasOfDifferentBoundingBoxes.get(index1);
-                double area2 = areasOfDifferentBoundingBoxes.get(index2);
-                return Double.compare(area1, area2);
+            public int compare(Map.Entry<Integer, Double> entry1, Map.Entry<Integer, Double> entry2) {
+                return entry1.getValue().compareTo(entry2.getValue());
             }
         });
 
-        return sortedEntries;
+        // Find the smallest area of the assuming bounding boxes (ties)
+        Double smallestAssumingBoundingBoxArea = entryList.get(0).getValue();
+
+        // Remove entries with areas other than the smallest area
+        Iterator<Map.Entry<Integer, Double>> iterator = entryList.iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Integer, Double> entry = iterator.next();
+            if (!entry.getValue().equals(smallestAssumingBoundingBoxArea)) {
+                iterator.remove();
+            }
+        }
+
+        // Resolve ties by choosing the entry with the bounding box of the smallest area
+        Double smallestArea = Double.MAX_VALUE;
+        Entry sortedEntry = null;
+        for (Map.Entry<Integer, Double> entry : entryList) {
+            if (entriesToSort.get(entry.getKey()).getBoundingBox().computeArea()<smallestArea) {
+                sortedEntry = entriesToSort.get(entry.getKey());
+            }
+        }
+
+        return sortedEntry;
+    }
+
+    public Entry getEntryWithTheLeastOverlapEnlargement(Entry incomingEntry) {
+        // Compute and store the overlaps of different bounding boxes
+        HashMap<Integer, Double> overlapsOfDifferentBoundingBoxes = new HashMap<>();
+        for (int i=0; i<entries.size(); i++) {
+            BoundingBox assumingBoundingBox = entries.get(i).assumingBoundingBox(incomingEntry);
+            double overlap = 0.0;
+            for (int j=0; j<entries.size(); j++) {
+                if (j != i) {
+                    overlap += entries.get(j).getBoundingBox().computeOverlap(assumingBoundingBox);
+                }
+            }
+            overlapsOfDifferentBoundingBoxes.put(i, overlap);
+        }
+
+        // Convert the HashMap to a list of entries
+        List<Map.Entry<Integer, Double>> entryList = new ArrayList<>(overlapsOfDifferentBoundingBoxes.entrySet());
+        // Sort the list based on the values (areas)
+        Collections.sort(entryList, new Comparator<Map.Entry<Integer, Double>>() {
+            @Override
+            public int compare(Map.Entry<Integer, Double> entry1, Map.Entry<Integer, Double> entry2) {
+                return entry1.getValue().compareTo(entry2.getValue());
+            }
+        });
+
+        // Find the smallest overlap (ties)
+        Double smallestOverlap = entryList.get(0).getValue();
+
+        // Remove entries with overlaps other than the smallest overlap
+        Iterator<Map.Entry<Integer, Double>> iterator = entryList.iterator();
+        ArrayList<Entry> sortedEntries = new ArrayList<>();
+        while (iterator.hasNext()) {
+            Map.Entry<Integer, Double> entry = iterator.next();
+            if (!entry.getValue().equals(smallestOverlap)) {
+                iterator.remove();
+            }
+            sortedEntries.add(entries.get(entry.getKey()));
+        }
+
+        // Resolve ties by calling getEntryWithTheLeastAreaEnlargement
+        if (sortedEntries.size()>1) {
+            return getEntryWithTheLeastAreaEnlargement(incomingEntry, sortedEntries);
+        }
+        return sortedEntries.get(0);
     }
 }

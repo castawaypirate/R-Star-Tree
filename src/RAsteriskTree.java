@@ -71,9 +71,19 @@ public class RAsteriskTree {
                 // data rectangle
 
                 // Let A be the group of the first p entries
+                node.getEntryWithTheLeastAreaEnlargement(entry, node.getEntries());
 
-
+                // From the items in A, considering all items in
+                // N, choose the leaf/entry whose rectangle needs the
+                // least overlap enlargement
+                node.getEntryWithTheLeastOverlapEnlargement(entry);
+                return node.getEntries().get(0).getChildNode();
             }
+            // choose the leaf/entry in N whose rectangle needs the least
+            // overlap enlargement to include the new data
+            // rectangle. Resolve ties by choosing the leaf/entry
+            // whose rectangle needs the least area enlargement, then
+            // the leaf with the rectangle of smallest area
 
         }
         return null;
