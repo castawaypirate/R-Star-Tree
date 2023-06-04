@@ -150,4 +150,26 @@ public class Node {
         }
         return sortedEntries.get(0);
     }
+
+    public void sortEntriesByAreaEnlargement (Entry incomingEntry) {
+        // Compute and store the areas of different bounding boxes
+        ArrayList<Double> areasOfDifferentBoundingBoxes = new ArrayList<>();
+        for (Entry entry : entries) {
+            BoundingBox assumedBoundingBox = entry.assumingBoundingBox(incomingEntry);
+            double area = assumedBoundingBox.computeArea();
+            areasOfDifferentBoundingBoxes.add(area);
+        }
+
+        // Sort the entries based on the areas of their assumed bounding boxes
+        Collections.sort(entries, new Comparator<Entry>() {
+            @Override
+            public int compare(Entry entry1, Entry entry2) {
+                int index1 = entries.indexOf(entry1);
+                int index2 = entries.indexOf(entry2);
+                double area1 = areasOfDifferentBoundingBoxes.get(index1);
+                double area2 = areasOfDifferentBoundingBoxes.get(index2);
+                return Double.compare(area1, area2);
+            }
+        });
+    }
 }

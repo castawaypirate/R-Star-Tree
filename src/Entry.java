@@ -12,12 +12,20 @@ public class Entry {
         return boundingBox;
     }
 
+    public void setBoundingBox(BoundingBox boundingBox) {
+        this.boundingBox = boundingBox;
+    }
+
     public void showEntry() {
         boundingBox.showBoundingBox();
     }
 
     public Node getChildNode() {
         return childNode;
+    }
+
+    public void setChildNode(Node childNode) {
+        this.childNode = childNode;
     }
 
     public BoundingBox assumingBoundingBox (Entry incomingEntry) {

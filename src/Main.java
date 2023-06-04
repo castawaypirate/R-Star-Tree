@@ -4,7 +4,7 @@ import java.util.Arrays;
 public class Main {
     public static void main(String[] args) {
 
-        //sort entries by enlargement area functionality testing
+        //sort entries by overlap enlargement functionality testing
         Bounds bounds1 = new Bounds(1.0,0.0);
         Bounds bounds2 = new Bounds(1.0,0.0);
         ArrayList<Bounds> arrbounds1 = new ArrayList<>();

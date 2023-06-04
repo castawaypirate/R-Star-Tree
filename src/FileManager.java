@@ -53,14 +53,14 @@ public class FileManager {
     }
 
     public ArrayList<Block> readDatafile() {
+        ArrayList<Block> blocksFromDatafile = new ArrayList<>();
         try (FileInputStream fileInputStream = new FileInputStream(pathToDatafile);
              ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
-            blocks = (ArrayList<Block>) objectInputStream.readObject();
-            System.out.println(blocks.size());
+            blocksFromDatafile = (ArrayList<Block>) objectInputStream.readObject();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
-        return blocks;
+        return blocksFromDatafile;
     }
 
     public void writeToDatafile(ArrayList<Record> records){

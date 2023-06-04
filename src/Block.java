@@ -7,6 +7,8 @@ public class Block implements Serializable{
     private int numberOfBlocks;
     private int numberOfRecordsInsideDatafile;
     private ArrayList<Record> records;
+    // more thought must be applied here
+    private ArrayList<Entry> entries;
 
     public Block(int blockid, String blockname){
         this.blockid = blockid;
