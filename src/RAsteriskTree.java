@@ -28,7 +28,7 @@ public class RAsteriskTree {
         // must do or the entries must be sorted, only time will tell
         ArrayList<Record> sortedRecords = fileManager.readDataFromCSVFile(CSVfilePath);
         fileManager.writeToDatafile(sortedRecords);
-        insertData(new Record(632980450, "632980450",new ArrayList<Double>(Arrays.asList(41.5448493,26.5947027))));
+        insertData(new Record(632980450, "632980450", new ArrayList<Double>(Arrays.asList(41.5448493,26.5947027))));
     }
 
     public void insertData(Record record) {
@@ -138,6 +138,10 @@ public class RAsteriskTree {
 
     public Node split(Node node) {
         return null;
+    }
+
+    public void chooseSplitAxis(Node node) {
+
     }
 
 

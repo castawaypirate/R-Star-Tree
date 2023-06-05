@@ -172,4 +172,31 @@ public class Node {
             }
         });
     }
+
+    public ArrayList<Entry> sortEntriesByBound(int dimension, boolean upperBound) {
+        HashMap<Entry, Double> mapOfEntriesAndBounds = new HashMap<>();
+        for (Entry entry : entries) {
+            if (upperBound) {
+                mapOfEntriesAndBounds.put(entry, entry.getBoundingBox().getBounds().get(dimension-1).getUpperBound());
+            } else {
+                mapOfEntriesAndBounds.put(entry, entry.getBoundingBox().getBounds().get(dimension-1).getLowerBound());
+            }
+        }
+
+        // Convert the HashMap entries to a list
+        List<Map.Entry<Entry, Double>> entryList = new ArrayList<>(mapOfEntriesAndBounds.entrySet());
+
+        // Sort the list based on the values
+        entryList.sort(Map.Entry.comparingByValue());
+
+        // Extract the sorted entries into a new ArrayList
+        ArrayList<Entry> sortedEntries = new ArrayList<>();
+        for (Map.Entry<Entry, Double> entry : entryList) {
+            sortedEntries.add(entry.getKey());
+        }
+
+        return sortedEntries;
+
+
+    }
 }

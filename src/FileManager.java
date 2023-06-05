@@ -97,6 +97,11 @@ public class FileManager {
         }
     }
 
+    public void writeIndexfile(Node node) {
+        // k = entries ana block (opou ena block = node)
+        // node na to grapseis sto indexfile.dat
+    }
+
     public int numberOfRecordsInABlock(Record record){
         Block block = new Block(1,"block1");
 //        System.out.println(getBytesOfObject(record));
