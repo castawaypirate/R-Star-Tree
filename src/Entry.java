@@ -2,6 +2,7 @@ import java.util.ArrayList;
 
 public class Entry {
     private BoundingBox boundingBox;
+    // respective node
     private Node childNode;
 
     public Entry(BoundingBox boundingBox) {

@@ -33,8 +33,9 @@ public class Node {
     }
 
     public void showEntries() {
-        for(Entry entry : entries) {
-            entry.showEntry();
+        for(int i=0; i<entries.size(); i++) {
+            System.out.println("Entry in index " + i +":");
+            entries.get(i).showEntry();
         }
     }
 
@@ -177,9 +178,9 @@ public class Node {
         HashMap<Entry, Double> mapOfEntriesAndBounds = new HashMap<>();
         for (Entry entry : entries) {
             if (upperBound) {
-                mapOfEntriesAndBounds.put(entry, entry.getBoundingBox().getBounds().get(dimension-1).getUpperBound());
+                mapOfEntriesAndBounds.put(entry, entry.getBoundingBox().getBounds().get(dimension).getUpperBound());
             } else {
-                mapOfEntriesAndBounds.put(entry, entry.getBoundingBox().getBounds().get(dimension-1).getLowerBound());
+                mapOfEntriesAndBounds.put(entry, entry.getBoundingBox().getBounds().get(dimension).getLowerBound());
             }
         }
 

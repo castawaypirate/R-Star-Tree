@@ -6,6 +6,10 @@ public class BoundingBox {
         this.bounds = bounds;
     }
 
+    public BoundingBox() {
+        bounds = new ArrayList<>();
+    }
+
     public void showBoundingBox() {
         for(int i=0;i<bounds.size();i++) {
             System.out.println("Bounds in dimension " + (i+1) + ": " + bounds.get(i).getUpperBound() + ", " + bounds.get(i).getLowerBound());
@@ -41,4 +45,65 @@ public class BoundingBox {
 
         return overlap;
     }
+
+    public double computeMargin() {
+        double margin = 0.0;
+        for (Bounds bound : bounds) {
+            double dimensionLength = bound.getUpperBound() - bound.getLowerBound();
+            margin += 2 * dimensionLength; // Add the length of both sides of the dimension
+        }
+        return margin;
+    }
+
+    public ArrayList<Double> computeCenter() {
+        ArrayList<Double> center = new ArrayList<>();
+        for (Bounds bound : bounds) {
+            Double dimensionCenter = (bound.getUpperBound() + bound.getLowerBound()) / 2.0;
+            center.add(dimensionCenter);
+        }
+        return center;
+    }
+
+    public Double computeDistanceBetweenCenters(ArrayList<Double> incomingCenter) {
+        // Get the center coordinates of the current bounding box
+        ArrayList<Double> currentCenter = computeCenter();
+        // Calculate the Euclidean distance between the centers
+        Double distance = 0.0;
+        for (int i = 0; i < currentCenter.size(); i++) {
+            Double diff = currentCenter.get(i) - incomingCenter.get(i);
+            distance += Math.pow(diff, 2);
+        }
+        distance = Math.sqrt(distance);
+        return distance;
+    }
+
+    public void createBoundingBoxOfEntries(ArrayList<Entry> entries) {
+        // Initialize the bounds with the values from the first entry
+        Entry firstEntry = entries.get(0);
+        ArrayList<Bounds> firstEntryBounds = firstEntry.getBoundingBox().getBounds();
+        for (Bounds bound : firstEntryBounds) {
+            bounds.add(new Bounds(bound.getUpperBound(), bound.getLowerBound()));
+        }
+
+        // Iterate over the remaining entries and update the bounds
+        for (int i = 1; i < entries.size(); i++) {
+            Entry entry = entries.get(i);
+            ArrayList<Bounds> entryBounds = entry.getBoundingBox().getBounds();
+
+            // Update the bounds for each dimension
+            for (int j = 0; j < bounds.size(); j++) {
+                Bounds currentBounds = bounds.get(j);
+                Bounds entryBound = entryBounds.get(j);
+
+                // Update the upper and lower bounds if necessary
+                if (entryBound.getUpperBound() > currentBounds.getUpperBound()) {
+                    currentBounds.setUpperBound(entryBound.getUpperBound());
+                }
+                if (entryBound.getLowerBound() < currentBounds.getLowerBound()) {
+                    currentBounds.setLowerBound(entryBound.getLowerBound());
+                }
+            }
+        }
+    }
+
 }

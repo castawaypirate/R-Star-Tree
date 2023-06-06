@@ -1,10 +1,13 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
 
-        // test node sortEntriesByBound
+        // test split node
+        RAsteriskTree r = new RAsteriskTree(2);
+
         Bounds bounds1 = new Bounds(1.0,0.0);
         Bounds bounds2 = new Bounds(1.0,0.0);
         ArrayList<Bounds> arrbounds1 = new ArrayList<>();
@@ -39,14 +42,63 @@ public class Main {
 
         Node node = new Node(1,true);
 
-        node.addEntry(entry2);
         node.addEntry(entry1);
+        node.addEntry(entry2);
         node.addEntry(entry3);
-        node.showEntries();
+//        node.addEntry(entry4);
 
-        node.setEntries(node.sortEntriesByBound(1,false));
-        System.out.println();
-        node.showEntries();
+        List<Node> split = r.split(node);
+
+        for (Node e: split) {
+            e.showEntries();
+        }
+
+
+
+
+//        // test node sortEntriesByBound
+//        Bounds bounds1 = new Bounds(1.0,0.0);
+//        Bounds bounds2 = new Bounds(1.0,0.0);
+//        ArrayList<Bounds> arrbounds1 = new ArrayList<>();
+//        arrbounds1.add(bounds1);
+//        arrbounds1.add(bounds2);
+//        BoundingBox box1 = new BoundingBox(arrbounds1);
+//        Entry entry1 = new Entry(box1);
+//
+//        Bounds bounds3 = new Bounds(2.0,1.0);
+//        Bounds bounds4 = new Bounds(2.0,1.0);
+//        ArrayList<Bounds> arrbounds2 = new ArrayList<>();
+//        arrbounds2.add(bounds3);
+//        arrbounds2.add(bounds4);
+//        BoundingBox box2 = new BoundingBox(arrbounds2);
+//        Entry entry2 = new Entry(box2);
+//
+//        Bounds bounds5 = new Bounds(3.0,2.0);
+//        Bounds bounds6 = new Bounds(3.0,2.0);
+//        ArrayList<Bounds> arrbounds3 = new ArrayList<>();
+//        arrbounds3.add(bounds5);
+//        arrbounds3.add(bounds6);
+//        BoundingBox box3 = new BoundingBox(arrbounds3);
+//        Entry entry3 = new Entry(box3);
+//
+//        Bounds bounds7 = new Bounds(4.0,3.0);
+//        Bounds bounds8 = new Bounds(4.0,3.0);
+//        ArrayList<Bounds> arrbounds4 = new ArrayList<>();
+//        arrbounds4.add(bounds7);
+//        arrbounds4.add(bounds8);
+//        BoundingBox box4 = new BoundingBox(arrbounds4);
+//        Entry entry4 = new Entry(box4);
+//
+//        Node node = new Node(1,true);
+//
+//        node.addEntry(entry2);
+//        node.addEntry(entry1);
+//        node.addEntry(entry3);
+//        node.showEntries();
+//
+//        node.setEntries(node.sortEntriesByBound(1,false));
+//        System.out.println();
+//        node.showEntries();
 
 
         //sort entries by overlap enlargement functionality testing

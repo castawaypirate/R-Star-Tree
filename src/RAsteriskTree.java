@@ -1,9 +1,9 @@
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 
 public class RAsteriskTree {
     private FileManager fileManager;
     private int dimensions;
+    // an arraylist of boolean where true is stored if overflow treatment has occurred to a level
     private ArrayList<Boolean> otInLevel;
     private final static int leafLevel = 1;
     //defines how many entries of a node should be used during ChooseSubtree
@@ -19,8 +19,8 @@ public class RAsteriskTree {
         fileManager = new FileManager(dimensions);
         root = new Node(1, true);
         numberOfEntriesInTheTree = 0;
-        M=64;
-        m=16;
+        M=2;
+        m=1;
 
     }
 
@@ -123,27 +123,171 @@ public class RAsteriskTree {
             return null;
         }
 
-        Node split = split(node);
+        List<Node> splitResult = split(node);
 
+        // If OverflowTreatment caused a split of the root, create a new root
         if (node.isRoot()) {
 
+            // I4
         }
 
-        return split;
+        return null;
     }
 
     public void reinsert(Node node) {
 
     }
 
-    public Node split(Node node) {
-        return null;
+    public List<Node> split(Node node) {
+        List<Pair<ArrayList<Entry>, ArrayList<Entry>>> chooseSplitAxisDistribution = chooseSplitAxis(node);
+        return chooseSplitIndex(chooseSplitAxisDistribution, node.getLevel());
     }
 
-    public void chooseSplitAxis(Node node) {
+    public List<Pair<ArrayList<Entry>, ArrayList<Entry>>> chooseSplitAxis(Node node) {
+        // For each axis sort the entries by the lower than by the upper
+        // value of their rectangles and determine all distributions as described above Compute S which is the
+        // sum of all margin-values of the different distributions
+
+
+        double margin = Double.MAX_VALUE;
+        List<Pair<ArrayList<Entry>, ArrayList<Entry>>> chooseSplitAxisDistribution = new ArrayList<>();
+        for (int dim = 0; dim < dimensions; dim++) {
+            // sort entries by lower and upper bound and put them in two arraylists
+            ArrayList<Entry> sortedByUpperBound = node.sortEntriesByBound(dim, true);
+            ArrayList<Entry> sortedByLowerBound = node.sortEntriesByBound(dim, false);
+            List<ArrayList<Entry>> listOfAllSortedEntries = new ArrayList<>();
+            listOfAllSortedEntries.add(sortedByUpperBound);
+            listOfAllSortedEntries.add(sortedByLowerBound);
+
+//            for(Entry e : sortedByUpperBound) {
+//                e.showEntry();
+//            }
+//
+//            for(Entry e : sortedByLowerBound) {
+//                e.showEntry();
+//            }
+
+            // margin of the distributions of this axis
+            double axisMargin = 0;
+            // list of pairs of first and second group
+            List<Pair<ArrayList<Entry>, ArrayList<Entry>>> optimalDistributions = new ArrayList<>();
+            // iterate all the possible distributions
+            for (ArrayList<Entry> list : listOfAllSortedEntries) {
+                // initialize groups
+                ArrayList<Entry> firstGroup = new ArrayList<>();
+                ArrayList<Entry> secondGroup = new ArrayList<>();
+                // for each sort M-2m+2 distributions of the M+1 entries into two groups are
+                // determined, where the k-th distribution (k=1, , (M-2m+2)) is described
+                // as follows.
+                for (int k=1; k<M-2*m+2; k++) {
+                    //  the first group contains the first (m-1)+k entries, the second
+                    //  group contains the remaining entries.
+                    firstGroup.clear();
+                    secondGroup.clear();
+                    for (int i=0; i<node.getEntries().size(); i++) {
+                        if (i<m-1+k) {
+                            firstGroup.add(list.get(i));
+                        } else {
+                            secondGroup.add(list.get(i));
+                        }
+                    }
+                    // construct the bounding boxes of each group
+                    BoundingBox firstGroupBoundingBox = new BoundingBox();
+                    firstGroupBoundingBox.createBoundingBoxOfEntries(firstGroup);
+                    BoundingBox secondGroupBoundingBox = new BoundingBox();
+                    secondGroupBoundingBox.createBoundingBoxOfEntries(secondGroup);
+                    optimalDistributions.add(new Pair<>(firstGroup, secondGroup));
+                    axisMargin += firstGroupBoundingBox.computeMargin() + secondGroupBoundingBox.computeMargin();
+                }
+                // Choose the axis with the minimum sum as split axis
+                if (margin > axisMargin)
+                {
+                    // bestSplitAxis = d;
+                    margin = axisMargin;
+                    chooseSplitAxisDistribution.clear();
+                    chooseSplitAxisDistribution = optimalDistributions;
+                }
+            }
+        }
+        return chooseSplitAxisDistribution;
+    }
+
+    public List<Node> chooseSplitIndex (List<Pair<ArrayList<Entry>, ArrayList<Entry>>> chooseSplitAxisDistribution, int level) {
+        // compute the overlap of each pair and store in a hashmap as value
+        // with key the index of list that contains the pairs
+        HashMap<Integer, Double> overlap = new HashMap<>();
+        for (int i=0; i<chooseSplitAxisDistribution.size(); i++) {
+            BoundingBox firstGroupBoundingBox = new BoundingBox();
+            firstGroupBoundingBox.createBoundingBoxOfEntries(chooseSplitAxisDistribution.get(i).getFirst());
+            BoundingBox secondGroupBoundingBox = new BoundingBox();
+            secondGroupBoundingBox.createBoundingBoxOfEntries(chooseSplitAxisDistribution.get(i).getSecond());
+            overlap.put(i, firstGroupBoundingBox.computeOverlap(secondGroupBoundingBox));
+        }
+        // Convert the HashMap to a list
+        List<Map.Entry<Integer, Double>> overlapList = new ArrayList<>(overlap.entrySet());
+        // Sort the list based on the values (overlap)
+        Collections.sort(overlapList, new Comparator<Map.Entry<Integer, Double>>() {
+            @Override
+            public int compare(Map.Entry<Integer, Double> entry1, Map.Entry<Integer, Double> entry2) {
+                return entry1.getValue().compareTo(entry2.getValue());
+            }
+        });
+        // Find the smallest overlap (ties)
+        Double smallestOverlap = overlapList.get(0).getValue();
+        int index = 0;
+        // Remove the elements with overlaps other than the smallest overlap
+        Iterator<Map.Entry<Integer, Double>> iterator = overlapList.iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Integer, Double> entry = iterator.next();
+            if (!entry.getValue().equals(smallestOverlap)) {
+                iterator.remove();
+            }
+        }
+
+        // Resolve ties by choosing the distribution with the minimum area-value
+        if (overlapList.size()>1) {
+            double smallestArea = Double.MAX_VALUE;
+            for (int i=0; i<overlapList.size(); i++) {
+                ArrayList<Entry> merged = new ArrayList<>();
+                merged.addAll(chooseSplitAxisDistribution.get(overlapList.get(i).getKey()).getFirst());
+                merged.addAll(chooseSplitAxisDistribution.get(overlapList.get(i).getKey()).getSecond());
+                BoundingBox box = new BoundingBox();
+                box.createBoundingBoxOfEntries(merged);
+                double area = box.computeArea();
+                if (area<smallestArea) {
+                    smallestArea = area;
+                    index=i;
+                }
+            }
+        }
+        ArrayList<Node> splitNodes = new ArrayList<>();
+        Node firstNode = new Node(level, false);
+        firstNode.setEntries(chooseSplitAxisDistribution.get(index).getFirst());
+        Node secondNode = new Node(level, false);
+        secondNode.setEntries(chooseSplitAxisDistribution.get(index).getSecond());
+        splitNodes.add(firstNode);
+        splitNodes.add(secondNode);
+        return splitNodes;
 
     }
 
 
+}
 
+class Pair<T1, T2> {
+    private T1 first;
+    private T2 second;
+
+    public Pair(T1 first, T2 second) {
+        this.first = first;
+        this.second = second;
+    }
+
+    public T1 getFirst() {
+        return first;
+    }
+
+    public T2 getSecond() {
+        return second;
+    }
 }
