@@ -2,8 +2,10 @@ import java.util.ArrayList;
 
 public class Entry {
     private BoundingBox boundingBox;
-    // respective node
+    // node which the bounding box is corresponding to
     private Node childNode;
+    // node in which the entry is in
+    private Node parentNode;
 
     public Entry(BoundingBox boundingBox) {
         this.boundingBox = boundingBox;
@@ -29,7 +31,15 @@ public class Entry {
         this.childNode = childNode;
     }
 
-    public BoundingBox assumingBoundingBox (Entry incomingEntry) {
+    public Node getParentNode() {
+        return parentNode;
+    }
+
+    public void setParentNode(Node parentNode) {
+        this.parentNode = parentNode;
+    }
+
+    public BoundingBox assumingBoundingBox(Entry incomingEntry) {
         ArrayList<Bounds> boundsInEachDimension = new ArrayList<>();
         for (int i = 0; i < boundingBox.getBounds().size(); i++) {
             Bounds bounds = new Bounds();

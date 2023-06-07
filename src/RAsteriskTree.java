@@ -8,7 +8,9 @@ public class RAsteriskTree {
     private final static int leafLevel = 1;
     //defines how many entries of a node should be used during ChooseSubtree
     private final static int RTREE_CHOOSE_SUBTREE_P = 32;
+    private final static int RTREE_REINSERT_P = 3;
     private Node root;
+    private int rootLevel;
     private int M;
     private int m;
     private int numberOfEntriesInTheTree;
@@ -17,11 +19,16 @@ public class RAsteriskTree {
         otInLevel = new ArrayList<>();
         otInLevel.add(false);
         fileManager = new FileManager(dimensions);
-        root = new Node(1, true);
+        rootLevel=1;
+        root = new Node(rootLevel, true);
         numberOfEntriesInTheTree = 0;
         M=2;
         m=1;
 
+    }
+
+    public Node getRoot() {
+        return root;
     }
 
     public void bulkLoading(String CSVfilePath){
@@ -44,37 +51,49 @@ public class RAsteriskTree {
     }
 
     public Node insert(Entry entry, Node node, int level) {
-        // I4
+        Node nodeToAdd = null;
         if (node.getParentEntry() == null) {
             System.out.println("We still in root");
         } else {
+            // I4 Adjust all covering rectangles in the insertion
+            // path such that they are minimum bounding boxes
+            // enclosing their children
             node.getParentEntry().setBoundingBox(node.getParentEntry().assumingBoundingBox(entry));
         }
-        // CS2
+        // CS2: If we're at a leaf (or the level we wanted to insert the dataEntry), then use that level
+        // I2: If N has less than M items, accommodate E in N
         if (node.getLevel() == level) {
             node.addEntry(entry);
         } else {
-            //I1
+            // I1 Invoke ChooseSubtree, with the level as a parameter,
+            // to find an appropriate node N, in which to place the
+            // new Entry E (entry)
             Node chosenNode = chooseSubtree(node, entry, level);
-            Node entryToAdd = insert(entry, chosenNode, level);
+            nodeToAdd = insert(entry, chosenNode, level);
 
-            if (entryToAdd == null) {
+            if (nodeToAdd == null) {
                 return null;
+            } else {
+                nodeToAdd.addEntry(entry);
             }
 
-//            node.addEntry(entryToAdd.);
         }
-
-        // Overflow treatment
-        if (node.getEntries().size()>=M) {
+        if (node.getEntries().size()>M) {
             return overflowTreatment(node);
         }
+//        if (nodeToAdd != null) {
+//            // Overflow treatment
+//            if (nodeToAdd.getEntries().size()>=M) {
+//                return overflowTreatment(nodeToAdd);
+//            }
+//        }
+
 
         return null;
     }
 
     public Node chooseSubtree(Node node, Entry entry, int level) {
-        if (node.hasLeaves()) {
+        if (node.getLevel() == level) {
             if (M > (RTREE_CHOOSE_SUBTREE_P*2)/3  && node.getEntries().size() > RTREE_CHOOSE_SUBTREE_P) {
                 // ** alternative algorithm:
                 // Sort the rectangles in N in increasing order of
@@ -122,20 +141,77 @@ public class RAsteriskTree {
             reinsert(node);
             return null;
         }
-
         List<Node> splitResult = split(node);
+
+        node.changeRootStatus(false);
+        node.setEntries(splitResult.get(0).getEntries());
+        Node secondNode = splitResult.get(1);
+
 
         // If OverflowTreatment caused a split of the root, create a new root
         if (node.isRoot()) {
-
-            // I4
+            Node newRoot = new Node(node.getLevel()+1, true);
+            BoundingBox firsrtBoundingBox = new BoundingBox();
+            firsrtBoundingBox.createBoundingBoxOfEntries(node.getEntries());
+            Entry firstEntry = new Entry(firsrtBoundingBox);
+            firstEntry.setParentNode(node);
+            BoundingBox secondBoundingBox = new BoundingBox();
+            secondBoundingBox.createBoundingBoxOfEntries(secondNode.getEntries());
+            Entry secondEntry = new Entry(secondBoundingBox);
+            secondEntry.setParentNode(secondNode);
+            newRoot.addEntry(firstEntry);
+            newRoot.addEntry(secondEntry);
         }
 
         return null;
     }
 
     public void reinsert(Node node) {
+        BoundingBox nodeBoundingBox = new BoundingBox();
+        if (node.getLevel() == rootLevel) {
+            nodeBoundingBox.createBoundingBoxOfEntries(node.getEntries());
+        } else {
+            nodeBoundingBox = node.getParentEntry().getBoundingBox();
+        }
 
+        // RI1 For all M+l items of a node N, compute the distance between the centers of their rectangles
+        // and the center of the bounding rectangle of N
+
+        HashMap<Integer, Double> distancesFromCenter = new HashMap<>();
+        for (int i=0; i<node.getEntries().size(); i++) {
+            distancesFromCenter.put(i, nodeBoundingBox.
+                    computeDistanceBetweenCenters(node.getEntries().get(i).getBoundingBox().computeCenter()));
+        }
+
+        // RI2: Sort the items in decreasing order (INCREASING order (since then we use close reinsert))
+        // of their distances computed in RI1
+        // Convert the HashMap to a List of Map.Entry objects
+        List<Map.Entry<Integer, Double>> entries = new ArrayList<>(distancesFromCenter.entrySet());
+        // Sort the list in decreasing order of values
+        Collections.sort(entries, new Comparator<Map.Entry<Integer, Double>>() {
+            @Override
+            public int compare(Map.Entry<Integer, Double> entry1, Map.Entry<Integer, Double> entry2) {
+                // Compare the values in descending order
+                return Double.compare(entry2.getValue(), entry1.getValue());
+            }
+        });
+
+        System.out.println(entries);
+        List<Entry> entriesToRemove = new ArrayList<>();
+
+        for (int i = 0; i < RTREE_REINSERT_P; i++) {
+            int index = entries.get(i).getKey();
+            Entry entryToRemove = node.getEntries().get(index);
+            entriesToRemove.add(entryToRemove);
+        }
+
+        // Remove the entries from the node
+        for (Entry entryToRemove : entriesToRemove) {
+            node.getEntries().remove(entryToRemove);
+        }
+        for (Entry e: node.getEntries()) {
+            e.showEntry();
+        }
     }
 
     public List<Node> split(Node node) {

@@ -29,6 +29,7 @@ public class Node {
     }
 
     public void addEntry(Entry entry) {
+        entry.setParentNode(this);
         entries.add(entry);
     }
 
@@ -62,6 +63,12 @@ public class Node {
 
     public void setParentEntry(Entry parentEntry) {
         this.parentEntry = parentEntry;
+    }
+
+    public void adjustBoundingBoxOfParentEntry() {
+        BoundingBox adjustedBoundingBox = new BoundingBox();
+        adjustedBoundingBox.createBoundingBoxOfEntries(entries);
+        parentEntry.setBoundingBox(adjustedBoundingBox);
     }
 
     public Entry getEntryWithTheLeastAreaEnlargement(Entry incomingEntry, ArrayList<Entry> entriesToSort) {
@@ -197,7 +204,5 @@ public class Node {
         }
 
         return sortedEntries;
-
-
     }
 }

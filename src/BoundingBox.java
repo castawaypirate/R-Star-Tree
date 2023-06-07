@@ -2,8 +2,10 @@ import java.util.ArrayList;
 
 public class BoundingBox {
     private ArrayList<Bounds> bounds;
+    private ArrayList<Double> center;
     public BoundingBox(ArrayList<Bounds> bounds) {
         this.bounds = bounds;
+        center = computeCenter();
     }
 
     public BoundingBox() {
@@ -65,12 +67,10 @@ public class BoundingBox {
     }
 
     public Double computeDistanceBetweenCenters(ArrayList<Double> incomingCenter) {
-        // Get the center coordinates of the current bounding box
-        ArrayList<Double> currentCenter = computeCenter();
         // Calculate the Euclidean distance between the centers
         Double distance = 0.0;
-        for (int i = 0; i < currentCenter.size(); i++) {
-            Double diff = currentCenter.get(i) - incomingCenter.get(i);
+        for (int i = 0; i < center.size(); i++) {
+            Double diff = center.get(i) - incomingCenter.get(i);
             distance += Math.pow(diff, 2);
         }
         distance = Math.sqrt(distance);
@@ -104,6 +104,8 @@ public class BoundingBox {
                 }
             }
         }
+
+        center = computeCenter();
     }
 
 }
