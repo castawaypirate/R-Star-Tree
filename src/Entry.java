@@ -7,8 +7,15 @@ public class Entry {
     // node in which the entry is in
     private Node parentNode;
 
-    public Entry(BoundingBox boundingBox) {
-        this.boundingBox = boundingBox;
+    public Entry() {
+    }
+
+    public Entry(Node node) {
+        this.childNode = node;
+        BoundingBox box = new BoundingBox();
+        box.createBoundingBoxOfEntries(node.getEntries());
+        this.boundingBox = box;
+        node.setParentEntry(this);
     }
 
     public BoundingBox getBoundingBox() {

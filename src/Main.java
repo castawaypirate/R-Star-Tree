@@ -5,58 +5,78 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
+
+        // insert testing
+        RAsteriskTree tree = new RAsteriskTree(2);
+
+        Record r1 = new Record(1, "1", new ArrayList<Double>(Arrays.asList(0.0,0.0)));
+        tree.insertData(r1);
+
+        Record r2 = new Record(2, "2", new ArrayList<Double>(Arrays.asList(6.0,6.0)));
+        tree.insertData(r2);
+
+        Record r3 = new Record(3, "3", new ArrayList<Double>(Arrays.asList(5.0,5.0)));
+        tree.insertData(r3);
+
+        Record r4 = new Record(4, "4", new ArrayList<Double>(Arrays.asList(1.0,1.0)));
+        tree.insertData(r4);
+
+        Record r5 = new Record(5, "5", new ArrayList<Double>(Arrays.asList(7.0,7.0)));
+        tree.insertData(r5);
+
+        Record r6 = new Record(6, "6", new ArrayList<Double>(Arrays.asList(700.0,700.0)));
+        tree.insertData(r6);
+
+//        for (Entry entry : tree.getRoot().getEntries()) {
+//            entry.getBoundingBox().showBoundingBox();
+//            System.out.println(entry.getChildNode().getLevel());
+//        }
+
+//        System.out.println(tree.getRoot().getEntries().get(0).getChildNode().getEntries().get(0).getBoundingBox());
+//        System.out.println("Entry A of Node");
+//        Entry A = tree.getRoot().getEntries().get(0);
+//        A.showEntry();
+//        System.out.println(A.getChildNode().getEntries().size());
+
+        System.out.println("Entry B of Node");
+        Entry B = tree.getRoot().getEntries().get(1);
+        B.showEntry();
+        System.out.println(B.getChildNode().getEntries().get(0).getChildNode().getEntries().size());
+        B.getChildNode().getEntries().get(0).getChildNode().getEntries().get(0).showEntry();
+        B.getChildNode().getEntries().get(1).getChildNode().getEntries().get(0).showEntry();
+        B.getChildNode().getEntries().get(1).getChildNode().getEntries().get(1).showEntry();
+
+
+
+
+
+        // test hasLeaves
+//        Bounds bounds1 = new Bounds(1.0,0.0);
+//        Bounds bounds2 = new Bounds(1.0,0.0);
+//        ArrayList<Bounds> arrbounds1 = new ArrayList<>();
+//        arrbounds1.add(bounds1);
+//        arrbounds1.add(bounds2);
+//        BoundingBox box1 = new BoundingBox(arrbounds1);
+//        Entry entry1 = new LeafEntry(0,box1);
+//
+//        Bounds bounds3 = new Bounds(2.0,1.0);
+//        Bounds bounds4 = new Bounds(2.0,1.0);
+//        ArrayList<Bounds> arrbounds2 = new ArrayList<>();
+//        arrbounds2.add(bounds3);
+//        arrbounds2.add(bounds4);
+//        BoundingBox box2 = new BoundingBox(arrbounds2);
+//        Entry entry2 = new Entry(box2);
+//        Node n1 = new Node(1);
+//        Node n2 = new Node(2);
+//
+//        n1.addEntry(entry1);
+//
+//        n2.addEntry(entry2);
+//
+//        System.out.println(n1.hasLeaves());
+//        System.out.println(n2.hasLeaves());
+
         // reinsert testing
-        RAsteriskTree r = new RAsteriskTree(2);
-
-        Bounds bounds1 = new Bounds(1.0,0.0);
-        Bounds bounds2 = new Bounds(1.0,0.0);
-        ArrayList<Bounds> arrbounds1 = new ArrayList<>();
-        arrbounds1.add(bounds1);
-        arrbounds1.add(bounds2);
-        BoundingBox box1 = new BoundingBox(arrbounds1);
-        Entry entry1 = new Entry(box1);
-
-        Bounds bounds3 = new Bounds(2.0,1.0);
-        Bounds bounds4 = new Bounds(2.0,1.0);
-        ArrayList<Bounds> arrbounds2 = new ArrayList<>();
-        arrbounds2.add(bounds3);
-        arrbounds2.add(bounds4);
-        BoundingBox box2 = new BoundingBox(arrbounds2);
-        Entry entry2 = new Entry(box2);
-
-        Bounds bounds5 = new Bounds(3.0,2.0);
-        Bounds bounds6 = new Bounds(3.0,2.0);
-        ArrayList<Bounds> arrbounds3 = new ArrayList<>();
-        arrbounds3.add(bounds5);
-        arrbounds3.add(bounds6);
-        BoundingBox box3 = new BoundingBox(arrbounds3);
-        Entry entry3 = new Entry(box3);
-
-        Bounds bounds7 = new Bounds(4.0,3.0);
-        Bounds bounds8 = new Bounds(4.0,3.0);
-        ArrayList<Bounds> arrbounds4 = new ArrayList<>();
-        arrbounds4.add(bounds7);
-        arrbounds4.add(bounds8);
-        BoundingBox box4 = new BoundingBox(arrbounds4);
-        Entry entry4 = new Entry(box4);
-
-        Bounds bounds9 = new Bounds(5.0,4.0);
-        Bounds bounds10 = new Bounds(5.0,4.0);
-        ArrayList<Bounds> arrbounds5 = new ArrayList<>();
-        arrbounds5.add(bounds9);
-        arrbounds5.add(bounds10);
-        BoundingBox box5 = new BoundingBox(arrbounds5);
-        Entry entry5 = new Entry(box5);
-
-
-        r.getRoot().getEntries().add(entry1);
-        r.getRoot().getEntries().add(entry2);
-        r.getRoot().getEntries().add(entry3);
-        r.getRoot().getEntries().add(entry4);
-        r.getRoot().getEntries().add(entry5);
-        r.reinsert(r.getRoot());
-
-//        // test split node
 //        RAsteriskTree r = new RAsteriskTree(2);
 //
 //        Bounds bounds1 = new Bounds(1.0,0.0);
@@ -91,17 +111,74 @@ public class Main {
 //        BoundingBox box4 = new BoundingBox(arrbounds4);
 //        Entry entry4 = new Entry(box4);
 //
-//        Node node = new Node(1,true);
+//        Bounds bounds9 = new Bounds(5.0,4.0);
+//        Bounds bounds10 = new Bounds(5.0,4.0);
+//        ArrayList<Bounds> arrbounds5 = new ArrayList<>();
+//        arrbounds5.add(bounds9);
+//        arrbounds5.add(bounds10);
+//        BoundingBox box5 = new BoundingBox(arrbounds5);
+//        Entry entry5 = new Entry(box5);
+//
+//
+//        r.getRoot().getEntries().add(entry1);
+//        r.getRoot().getEntries().add(entry2);
+//        r.getRoot().getEntries().add(entry3);
+//        r.getRoot().getEntries().add(entry4);
+//        r.getRoot().getEntries().add(entry5);
+//        r.reinsert(r.getRoot());
+
+////        // test split node
+//        RAsteriskTree r = new RAsteriskTree(2);
+//
+//        Bounds bounds1 = new Bounds(1.0,0.0);
+//        Bounds bounds2 = new Bounds(1.0,0.0);
+//        ArrayList<Bounds> arrbounds1 = new ArrayList<>();
+//        arrbounds1.add(bounds1);
+//        arrbounds1.add(bounds2);
+//        BoundingBox box1 = new BoundingBox(arrbounds1);
+//        Entry entry1 = new LeafEntry(1, box1);
+//
+//        Bounds bounds3 = new Bounds(21.0,20.0);
+//        Bounds bounds4 = new Bounds(21.0,20.0);
+//        ArrayList<Bounds> arrbounds2 = new ArrayList<>();
+//        arrbounds2.add(bounds3);
+//        arrbounds2.add(bounds4);
+//        BoundingBox box2 = new BoundingBox(arrbounds2);
+//        Entry entry2 = new LeafEntry(2, box2);
+//
+//        Bounds bounds5 = new Bounds(15.0,14.0);
+//        Bounds bounds6 = new Bounds(15.0,14.0);
+//        ArrayList<Bounds> arrbounds3 = new ArrayList<>();
+//        arrbounds3.add(bounds5);
+//        arrbounds3.add(bounds6);
+//        BoundingBox box3 = new BoundingBox(arrbounds3);
+//        Entry entry3 = new LeafEntry(3, box3);
+//
+//        Bounds bounds7 = new Bounds(5.0,4.0);
+//        Bounds bounds8 = new Bounds(5.0,4.0);
+//        ArrayList<Bounds> arrbounds4 = new ArrayList<>();
+//        arrbounds4.add(bounds7);
+//        arrbounds4.add(bounds8);
+//        BoundingBox box4 = new BoundingBox(arrbounds4);
+//        Entry entry4 = new LeafEntry(4, box4);
+//
+//        Node node = new Node(1);
 //
 //        node.addEntry(entry1);
 //        node.addEntry(entry2);
 //        node.addEntry(entry3);
 ////        node.addEntry(entry4);
 //
-//        List<Node> split = r.split(node);
+//        Pair<ArrayList<Entry>, ArrayList<Entry>> split = r.split(node);
 //
-//        for (Node e: split) {
-//            e.showEntries();
+//        System.out.println("first group");
+//        for (Entry entry : split.getFirst()) {
+//            entry.showEntry();
+//        }
+//        System.out.println();
+//        System.out.println("second group");
+//        for (Entry entry : split.getSecond()) {
+//            entry.showEntry();
 //        }
 
 

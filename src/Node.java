@@ -3,13 +3,11 @@ import java.util.*;
 public class Node {
     private ArrayList<Entry> entries;
     private int level;
-    private boolean isRoot;
     private Entry parentEntry;
 
-    public Node(int level, boolean isRoot) {
+    public Node(int level) {
         this.entries = new ArrayList<>();
         this.level = level;
-        this.isRoot = isRoot;
     }
 
     public ArrayList<Entry> getEntries() {
@@ -40,14 +38,6 @@ public class Node {
         }
     }
 
-    public boolean isRoot() {
-        return isRoot;
-    }
-
-    public void changeRootStatus(boolean isRoot) {
-        this.isRoot = isRoot;
-    }
-
     public boolean hasLeaves() {
         if (entries.size()>0) {
             if (entries.get(entries.size()-1) instanceof LeafEntry) {
@@ -65,14 +55,33 @@ public class Node {
         this.parentEntry = parentEntry;
     }
 
-    public void adjustBoundingBoxOfParentEntry() {
-        BoundingBox adjustedBoundingBox = new BoundingBox();
-        adjustedBoundingBox.createBoundingBoxOfEntries(entries);
-        parentEntry.setBoundingBox(adjustedBoundingBox);
+    public BoundingBox getNodeBoundingBox () {
+        if (parentEntry == null) {
+            // root has no parent entry, so we have to
+            // create its bounding box
+            BoundingBox rootBoundingBox = new BoundingBox();
+            rootBoundingBox.createBoundingBoxOfEntries(entries);
+            return rootBoundingBox;
+        }
+        // for all other nodes assign and return the bounding
+        // box of the entry which points to this node
+        return parentEntry.getBoundingBox();
+    }
+
+    public void adjustBoundingBoxToFitEntry(Entry incomingEntry) {
+        // exclude root case
+        if (parentEntry != null) {
+            ArrayList<Entry> tempEntries = new ArrayList<>();
+            tempEntries.addAll(entries);
+            tempEntries.add(incomingEntry);
+            BoundingBox adjustedBoundingBox = new BoundingBox();
+            adjustedBoundingBox.createBoundingBoxOfEntries(tempEntries);
+            parentEntry.setBoundingBox(adjustedBoundingBox);
+        }
     }
 
     public Entry getEntryWithTheLeastAreaEnlargement(Entry incomingEntry, ArrayList<Entry> entriesToSort) {
-        // Compute and store the areas of different bounding boxes
+        // compute and store the areas of different bounding boxes
         HashMap<Integer, Double> areasOfDifferentBoundingBoxes = new HashMap<>();
         for (int i = 0; i < entriesToSort.size(); i++) {
             BoundingBox assumedBoundingBox = entriesToSort.get(i).assumingBoundingBox(incomingEntry);
@@ -80,9 +89,9 @@ public class Node {
             areasOfDifferentBoundingBoxes.put(i, area);
         }
 
-        // Convert the HashMap to a list of entries
+        // convert the HashMap to a list of entries
         List<Map.Entry<Integer, Double>> entryList = new ArrayList<>(areasOfDifferentBoundingBoxes.entrySet());
-        // Sort the list based on the values (areas)
+        // sort the list based on the values (areas)
         Collections.sort(entryList, new Comparator<Map.Entry<Integer, Double>>() {
             @Override
             public int compare(Map.Entry<Integer, Double> entry1, Map.Entry<Integer, Double> entry2) {
@@ -90,10 +99,10 @@ public class Node {
             }
         });
 
-        // Find the smallest area of the assuming bounding boxes (ties)
+        // find the smallest area of the assuming bounding boxes (ties)
         Double smallestAssumingBoundingBoxArea = entryList.get(0).getValue();
 
-        // Remove entries with areas other than the smallest area
+        // remove entries with areas other than the smallest area
         Iterator<Map.Entry<Integer, Double>> iterator = entryList.iterator();
         while (iterator.hasNext()) {
             Map.Entry<Integer, Double> entry = iterator.next();
@@ -102,7 +111,7 @@ public class Node {
             }
         }
 
-        // Resolve ties by choosing the entry with the bounding box of the smallest area
+        // CS2 Resolve ties by choosing the entry with the rectangle of the smallest area
         Double smallestArea = Double.MAX_VALUE;
         Entry sortedEntry = null;
         for (Map.Entry<Integer, Double> entry : entryList) {
@@ -110,12 +119,11 @@ public class Node {
                 sortedEntry = entriesToSort.get(entry.getKey());
             }
         }
-
         return sortedEntry;
     }
 
     public Entry getEntryWithTheLeastOverlapEnlargement(Entry incomingEntry) {
-        // Compute and store the overlaps of different bounding boxes
+        // compute and store the overlaps of different bounding boxes
         HashMap<Integer, Double> overlapsOfDifferentBoundingBoxes = new HashMap<>();
         for (int i=0; i<entries.size(); i++) {
             BoundingBox assumingBoundingBox = entries.get(i).assumingBoundingBox(incomingEntry);
@@ -128,9 +136,9 @@ public class Node {
             overlapsOfDifferentBoundingBoxes.put(i, overlap);
         }
 
-        // Convert the HashMap to a list of entries
+        // convert the HashMap to a list of entries
         List<Map.Entry<Integer, Double>> entryList = new ArrayList<>(overlapsOfDifferentBoundingBoxes.entrySet());
-        // Sort the list based on the values (areas)
+        // sort the list based on the values (areas)
         Collections.sort(entryList, new Comparator<Map.Entry<Integer, Double>>() {
             @Override
             public int compare(Map.Entry<Integer, Double> entry1, Map.Entry<Integer, Double> entry2) {
@@ -138,10 +146,15 @@ public class Node {
             }
         });
 
-        // Find the smallest overlap (ties)
+
+        // CS2 Resolve ties by choosing the leaf/entry
+        // whose rectangle needs the least area enlargement, then
+        // the leaf with the rectangle of smallest area
+
+        // find the smallest overlap (ties)
         Double smallestOverlap = entryList.get(0).getValue();
 
-        // Remove entries with overlaps other than the smallest overlap
+        // remove entries with overlaps other than the smallest overlap
         Iterator<Map.Entry<Integer, Double>> iterator = entryList.iterator();
         ArrayList<Entry> sortedEntries = new ArrayList<>();
         while (iterator.hasNext()) {
@@ -152,7 +165,7 @@ public class Node {
             sortedEntries.add(entries.get(entry.getKey()));
         }
 
-        // Resolve ties by calling getEntryWithTheLeastAreaEnlargement
+        // resolve ties by calling getEntryWithTheLeastAreaEnlargement
         if (sortedEntries.size()>1) {
             return getEntryWithTheLeastAreaEnlargement(incomingEntry, sortedEntries);
         }
@@ -160,7 +173,7 @@ public class Node {
     }
 
     public void sortEntriesByAreaEnlargement (Entry incomingEntry) {
-        // Compute and store the areas of different bounding boxes
+        // compute and store the areas of different bounding boxes
         ArrayList<Double> areasOfDifferentBoundingBoxes = new ArrayList<>();
         for (Entry entry : entries) {
             BoundingBox assumedBoundingBox = entry.assumingBoundingBox(incomingEntry);
@@ -168,7 +181,7 @@ public class Node {
             areasOfDifferentBoundingBoxes.add(area);
         }
 
-        // Sort the entries based on the areas of their assumed bounding boxes
+        // sort the entries based on the areas of their assumed bounding boxes
         Collections.sort(entries, new Comparator<Entry>() {
             @Override
             public int compare(Entry entry1, Entry entry2) {
@@ -191,13 +204,13 @@ public class Node {
             }
         }
 
-        // Convert the HashMap entries to a list
+        // convert the HashMap entries to a list
         List<Map.Entry<Entry, Double>> entryList = new ArrayList<>(mapOfEntriesAndBounds.entrySet());
 
-        // Sort the list based on the values
+        // sort the list based on the values
         entryList.sort(Map.Entry.comparingByValue());
 
-        // Extract the sorted entries into a new ArrayList
+        // extract the sorted entries into a new ArrayList
         ArrayList<Entry> sortedEntries = new ArrayList<>();
         for (Map.Entry<Entry, Double> entry : entryList) {
             sortedEntries.add(entry.getKey());

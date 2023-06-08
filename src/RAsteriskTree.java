@@ -1,28 +1,33 @@
+import org.w3c.dom.ls.LSOutput;
+
 import java.util.*;
 
 public class RAsteriskTree {
     private FileManager fileManager;
     private int dimensions;
     // an arraylist of boolean where true is stored if overflow treatment has occurred to a level
-    private ArrayList<Boolean> otInLevel;
+    private ArrayList<Boolean> otInLevel = new ArrayList<>();
     private final static int leafLevel = 1;
     //defines how many entries of a node should be used during ChooseSubtree
     private final static int RTREE_CHOOSE_SUBTREE_P = 32;
     private final static int RTREE_REINSERT_P = 3;
     private Node root;
     private int rootLevel;
+    // maximum entries per node
     private int M;
+    // minimum entries per node
     private int m;
     private int numberOfEntriesInTheTree;
     public RAsteriskTree(int dimensions){
         this.dimensions = dimensions;
-        otInLevel = new ArrayList<>();
-        otInLevel.add(false);
         fileManager = new FileManager(dimensions);
+        // create root at level 1
         rootLevel=1;
-        root = new Node(rootLevel, true);
+        root = new Node(rootLevel);
+        // Set overflow treatment false for level 1
+        otInLevel.add(false);
         numberOfEntriesInTheTree = 0;
-        M=2;
+        M=3;
         m=1;
 
     }
@@ -33,36 +38,39 @@ public class RAsteriskTree {
 
     public void bulkLoading(String CSVfilePath){
         // must do or the entries must be sorted, only time will tell
+        // look the recordings for clues for the bulk loading
         ArrayList<Record> sortedRecords = fileManager.readDataFromCSVFile(CSVfilePath);
         fileManager.writeToDatafile(sortedRecords);
         insertData(new Record(632980450, "632980450", new ArrayList<Double>(Arrays.asList(41.5448493,26.5947027))));
     }
 
+    // Takes a record as a parameter, makes a leaf entry out of it
+    // and inserts in to the tree
     public void insertData(Record record) {
-        // Takes a record as a parameter, makes and entry out of it
-        // and inserts in to the tree
         ArrayList<Bounds> boundsInEachDimension = new ArrayList<>();
         for(int i=0;i<dimensions;i++) {
             Bounds bounds = new Bounds(record.getCoordinates().get(i), record.getCoordinates().get(i));
             boundsInEachDimension.add(bounds);
         }
+        // ID1 Invoke Insert starting with the leaf level as a
+        // parameter, to insert a new data rectangle
+        // CS1 Set N to be the root (as we pass the root as the node to add)
         insert(new LeafEntry(record.getId(), new BoundingBox(boundsInEachDimension)), root, leafLevel);
         numberOfEntriesInTheTree++;
     }
 
     public Node insert(Entry entry, Node node, int level) {
+
         Node nodeToAdd = null;
-        if (node.getParentEntry() == null) {
-            System.out.println("We still in root");
-        } else {
-            // I4 Adjust all covering rectangles in the insertion
-            // path such that they are minimum bounding boxes
-            // enclosing their children
-            node.getParentEntry().setBoundingBox(node.getParentEntry().assumingBoundingBox(entry));
-        }
-        // CS2: If we're at a leaf (or the level we wanted to insert the dataEntry), then use that level
-        // I2: If N has less than M items, accommodate E in N
+
+        // I4 Adjust all covering rectangles in the insertion
+        // path such that they are minimum bounding boxes
+        // enclosing their children
+        node.adjustBoundingBoxToFitEntry(entry);
+
+        // CS2 If N is a leaf (return N)
         if (node.getLevel() == level) {
+            // I2 If N has less than M entries, accommodate E in N
             node.addEntry(entry);
         } else {
             // I1 Invoke ChooseSubtree, with the level as a parameter,
@@ -71,99 +79,109 @@ public class RAsteriskTree {
             Node chosenNode = chooseSubtree(node, entry, level);
             nodeToAdd = insert(entry, chosenNode, level);
 
-            if (nodeToAdd == null) {
-                return null;
-            } else {
-                nodeToAdd.addEntry(entry);
+            if (nodeToAdd != null) {
+                node.addEntry(nodeToAdd.getParentEntry());
             }
 
         }
-        if (node.getEntries().size()>M) {
-            return overflowTreatment(node);
+        // I2 If N has M entries, invoke OverflowTreatment with the
+        // level of N as a parameter [for reinsertion or split]
+        if (node.getEntries().size() >= M) {
+            Pair<ArrayList<Entry>, ArrayList<Entry>> overflowTreatmentResult = overflowTreatment(node, node.getLevel());
+            // overflowTreatmentResult is null reinsert occurred, otherwise split occurred
+            if (overflowTreatmentResult != null) {
+                // S3
+                node.getEntries().clear();
+                node.setEntries(overflowTreatmentResult.getFirst());
+
+                Node secondNode = new Node(node.getLevel());
+                secondNode.setEntries(overflowTreatmentResult.getSecond());
+                Entry secondEntry = new Entry(secondNode);
+
+                if (node.getLevel() == rootLevel) {
+                    // I3 If OverflowTreatment caused a split of the root, create a new root
+                    rootLevel++;
+                    Node newRoot = new Node(rootLevel);
+
+                    Entry firstEntry = new Entry(node);
+
+                    newRoot.addEntry(firstEntry);
+                    newRoot.addEntry(secondEntry);
+
+                    root = newRoot;
+                } else {
+                    // I3 If OverflowTreatment was called and a split was performed, propagate
+                    // OverflowTreatment upwards if necessary
+                    return  secondEntry.getChildNode();
+                }
+            }
+            return null;
         }
-//        if (nodeToAdd != null) {
-//            // Overflow treatment
-//            if (nodeToAdd.getEntries().size()>=M) {
-//                return overflowTreatment(nodeToAdd);
-//            }
-//        }
-
-
         return null;
     }
 
     public Node chooseSubtree(Node node, Entry entry, int level) {
-        if (node.getLevel() == level) {
-            if (M > (RTREE_CHOOSE_SUBTREE_P*2)/3  && node.getEntries().size() > RTREE_CHOOSE_SUBTREE_P) {
-                // ** alternative algorithm:
-                // Sort the rectangles in N in increasing order of
-                // then area enlargement needed to include the new
-                // data rectangle
+        // CS2 if the childpointers in N point to leaves [determine
+        // the minimum overlap cost],
 
-                // Let A be the group of the first p entries
+        // we need to see of the childpointers of node point to leaves
+        // that's why we are checking it by increasing the leaf level by 1
+        if (node.getLevel() == level + 1) {
 
-                // From the items in A, considering all items in
-                // N, choose the leaf/entry whose rectangle needs the
-                // least overlap enlargement
+//            if (M > (RTREE_CHOOSE_SUBTREE_P*2)/3  && node.getEntries().size() > RTREE_CHOOSE_SUBTREE_P) {
+//                // ** alternative algorithm:
+//                // Sort the rectangles in N in increasing order of
+//                // then area enlargement needed to include the new
+//                // data rectangle
+//
+//                // Let A be the group of the first p entries
+//
+//                // From the items in A, considering all items in
+//                // N, choose the leaf/entry whose rectangle needs the
+//                // least overlap enlargement
+//
+//
+//
+//                // Choose the entry in N whose bounding box needs the least overlap enlargement
+//                // to include the new data
+//                Entry N = node.getEntryWithTheLeastOverlapEnlargement(entry);
+//
+//                return N.getChildNode();
+//            }
 
-
-
-                // Choose the entry in N whose bounding box needs the least overlap enlargement
-                // to include the new data
-                Entry N = node.getEntryWithTheLeastOverlapEnlargement(entry);
-
-                return N.getChildNode();
-            }
-            // choose the leaf/entry in N whose rectangle needs the least
+            // CS2 choose the entry in N whose rectangle needs the least
             // overlap enlargement to include the new data
-            // rectangle. Resolve ties by choosing the leaf/entry
-            // whose rectangle needs the least area enlargement, then
-            // the leaf with the rectangle of smallest area
+            // rectangle.
             Entry N = node.getEntryWithTheLeastOverlapEnlargement(entry);
-
+            // return the node that the entry of the leaf level + 1 node points to
             return N.getChildNode();
-
         }
-
+        // CS2 if the childpointers in N do not point to leaves [determine the minimum
+        // area cost],
+        // choose the entry in N whose rectangle needs the least area enlargement to
+        // include the new data rectangle.
         Entry N = node.getEntryWithTheLeastAreaEnlargement(entry, node.getEntries());
         return N.getChildNode();
     }
 
-    public Node overflowTreatment(Node node) {
-        // OT1: If the level is not the root level AND this is the first
+    public Pair<ArrayList<Entry>, ArrayList<Entry>> overflowTreatment(Node node, int nodeLevel) {
+        Pair<ArrayList<Entry>, ArrayList<Entry>> overflowTreatmentResult = null;
+        // OT1 If the level is not the root level and this is the first
         // call of OverflowTreatment in the given level during the
-        // insertion of one data rectangle, then invoke Reinsert
-        if (!node.isRoot() && otInLevel.get(node.getLevel()-1)==false) {
-            // overflow treatment was called in this level
-            otInLevel.set(node.getLevel()-1, true);
-            // set the next level false
-            otInLevel.add(false);
+        // insertion of one data rectangle, then
+        // invoke Reinsert
+        if (nodeLevel!=rootLevel && otInLevel.get(nodeLevel-1)==false) {
             reinsert(node);
-            return null;
+        } else {
+            // else
+            // invoke Split
+            overflowTreatmentResult = split(node);
         }
-        List<Node> splitResult = split(node);
-
-        node.changeRootStatus(false);
-        node.setEntries(splitResult.get(0).getEntries());
-        Node secondNode = splitResult.get(1);
-
-
-        // If OverflowTreatment caused a split of the root, create a new root
-        if (node.isRoot()) {
-            Node newRoot = new Node(node.getLevel()+1, true);
-            BoundingBox firsrtBoundingBox = new BoundingBox();
-            firsrtBoundingBox.createBoundingBoxOfEntries(node.getEntries());
-            Entry firstEntry = new Entry(firsrtBoundingBox);
-            firstEntry.setParentNode(node);
-            BoundingBox secondBoundingBox = new BoundingBox();
-            secondBoundingBox.createBoundingBoxOfEntries(secondNode.getEntries());
-            Entry secondEntry = new Entry(secondBoundingBox);
-            secondEntry.setParentNode(secondNode);
-            newRoot.addEntry(firstEntry);
-            newRoot.addEntry(secondEntry);
-        }
-
-        return null;
+        // overflow treatment was called in this level
+        otInLevel.set(nodeLevel-1, true);
+        // set the next level false
+        otInLevel.add(false);
+        return overflowTreatmentResult;
     }
 
     public void reinsert(Node node) {
@@ -176,7 +194,6 @@ public class RAsteriskTree {
 
         // RI1 For all M+l items of a node N, compute the distance between the centers of their rectangles
         // and the center of the bounding rectangle of N
-
         HashMap<Integer, Double> distancesFromCenter = new HashMap<>();
         for (int i=0; i<node.getEntries().size(); i++) {
             distancesFromCenter.put(i, nodeBoundingBox.
@@ -196,7 +213,8 @@ public class RAsteriskTree {
             }
         });
 
-        System.out.println(entries);
+
+        // RI3 Remove the first p entries from N and adjust the bounding box of N
         List<Entry> entriesToRemove = new ArrayList<>();
 
         for (int i = 0; i < RTREE_REINSERT_P; i++) {
@@ -209,57 +227,62 @@ public class RAsteriskTree {
         for (Entry entryToRemove : entriesToRemove) {
             node.getEntries().remove(entryToRemove);
         }
-        for (Entry e: node.getEntries()) {
-            e.showEntry();
-        }
+        // Adjust the bounding box of the node
+//        node.getParentEntry().getBoundingBox().createBoundingBoxOfEntries(node.getEntries());
+//        node.getParentEntry().getBoundingBox().showBoundingBox();
+//        node.rootBoundingBox().showBoundingBox();
+//        for (Entry e: node.getEntries()) {
+//            e.showEntry();
+//        }
     }
 
-    public List<Node> split(Node node) {
-        List<Pair<ArrayList<Entry>, ArrayList<Entry>>> chooseSplitAxisDistribution = chooseSplitAxis(node);
-        return chooseSplitIndex(chooseSplitAxisDistribution, node.getLevel());
+    // Algorithm Split
+    public Pair<ArrayList<Entry>, ArrayList<Entry>> split(Node node) {
+        // S1 Invoke ChooseSplitIndex to determine the axis, perpendicular to which
+        // the split is performed
+        ArrayList<Pair<ArrayList<Entry>, ArrayList<Entry>>> chooseSplitAxisListOfPairs = chooseSplitAxis(node);
+        // S2 Invoke ChooseSplitIndex to determine the best distribution into two groups
+        // along that axis
+        return chooseSplitIndex(chooseSplitAxisListOfPairs);
     }
 
-    public List<Pair<ArrayList<Entry>, ArrayList<Entry>>> chooseSplitAxis(Node node) {
-        // For each axis sort the entries by the lower than by the upper
-        // value of their rectangles and determine all distributions as described above Compute S which is the
-        // sum of all margin-values of the different distributions
-
-
-        double margin = Double.MAX_VALUE;
-        List<Pair<ArrayList<Entry>, ArrayList<Entry>>> chooseSplitAxisDistribution = new ArrayList<>();
+    // Algorithm ChooseSplitAxis
+    // In order to not compute the array of pairs again, instead of the axis it returns the list of pairs
+    // which contain the first and the second group of entries that have been distributed
+    public ArrayList<Pair<ArrayList<Entry>, ArrayList<Entry>>> chooseSplitAxis(Node node) {
+        // CSA1 For each axis/dimension
+        // Sort the entries by the lower, then by the upper value of their rectangles and
+        // determine all distributions/pairs of groups as described in the R*-tree paper.
+        // Compute S/marginS, the sum of all margin-values of the different distributions/
+        // pairs fo groups
+        double marginS = Double.MAX_VALUE;
+//        int splitAxis = 0;
+        ArrayList<Pair<ArrayList<Entry>, ArrayList<Entry>>> chooseSplitAxisListOfPairs = new ArrayList<>();
         for (int dim = 0; dim < dimensions; dim++) {
-            // sort entries by lower and upper bound and put them in two arraylists
-            ArrayList<Entry> sortedByUpperBound = node.sortEntriesByBound(dim, true);
+            // sort entries by lower, then by upper bound and put them in two ArrayLists
             ArrayList<Entry> sortedByLowerBound = node.sortEntriesByBound(dim, false);
-            List<ArrayList<Entry>> listOfAllSortedEntries = new ArrayList<>();
-            listOfAllSortedEntries.add(sortedByUpperBound);
-            listOfAllSortedEntries.add(sortedByLowerBound);
+            ArrayList<Entry> sortedByUpperBound = node.sortEntriesByBound(dim, true);
 
-//            for(Entry e : sortedByUpperBound) {
-//                e.showEntry();
-//            }
-//
-//            for(Entry e : sortedByLowerBound) {
-//                e.showEntry();
-//            }
+            // put the returned ArrayLists in a List
+            List<ArrayList<Entry>> listOfSortedEntriesInAxis = new ArrayList<>();
+            listOfSortedEntriesInAxis.add(sortedByLowerBound);
+            listOfSortedEntriesInAxis.add(sortedByUpperBound);
 
-            // margin of the distributions of this axis
+            // margin of this axis
             double axisMargin = 0;
             // list of pairs of first and second group
-            List<Pair<ArrayList<Entry>, ArrayList<Entry>>> optimalDistributions = new ArrayList<>();
+            ArrayList<Pair<ArrayList<Entry>, ArrayList<Entry>>> optimalPairs = new ArrayList<>();
+
             // iterate all the possible distributions
-            for (ArrayList<Entry> list : listOfAllSortedEntries) {
-                // initialize groups
-                ArrayList<Entry> firstGroup = new ArrayList<>();
-                ArrayList<Entry> secondGroup = new ArrayList<>();
-                // for each sort M-2m+2 distributions of the M+1 entries into two groups are
+            for (ArrayList<Entry> list : listOfSortedEntriesInAxis) {
+                // For each sort M-2m+2 distributions of the M+1 entries into two groups are
                 // determined, where the k-th distribution (k=1, , (M-2m+2)) is described
                 // as follows.
                 for (int k=1; k<M-2*m+2; k++) {
-                    //  the first group contains the first (m-1)+k entries, the second
+                    //  The first group contains the first (m-1)+k entries, the second
                     //  group contains the remaining entries.
-                    firstGroup.clear();
-                    secondGroup.clear();
+                    ArrayList<Entry> firstGroup = new ArrayList<>();
+                    ArrayList<Entry> secondGroup = new ArrayList<>();
                     for (int i=0; i<node.getEntries().size(); i++) {
                         if (i<m-1+k) {
                             firstGroup.add(list.get(i));
@@ -267,30 +290,79 @@ public class RAsteriskTree {
                             secondGroup.add(list.get(i));
                         }
                     }
+
+//                    System.out.println("k:"+k);
+//                    System.out.println("first group");
+//                    for (Entry entry : firstGroup) {
+//                        entry.showEntry();
+//                    }
+//                    System.out.println();
+//                    System.out.println("second group");
+//                    for (Entry entry : secondGroup) {
+//                        entry.showEntry();
+//                    }
+//                    System.out.println();
+//                    System.out.println();
+//                    System.out.println();
+
                     // construct the bounding boxes of each group
                     BoundingBox firstGroupBoundingBox = new BoundingBox();
                     firstGroupBoundingBox.createBoundingBoxOfEntries(firstGroup);
                     BoundingBox secondGroupBoundingBox = new BoundingBox();
                     secondGroupBoundingBox.createBoundingBoxOfEntries(secondGroup);
-                    optimalDistributions.add(new Pair<>(firstGroup, secondGroup));
+
+                    // add the pair of groups in optimalPairs
+                    optimalPairs.add(new Pair<>(firstGroup, secondGroup));
+                    // add the margin of the two bounding boxes of the two groups to the axisMargin
                     axisMargin += firstGroupBoundingBox.computeMargin() + secondGroupBoundingBox.computeMargin();
                 }
-                // Choose the axis with the minimum sum as split axis
-                if (margin > axisMargin)
+
+//                System.out.println(dim);
+//                System.out.println(optimalPairs.size());
+//                System.out.println(axisMargin);
+
+                // CSA2 Choose the axis with the minimum S/marginS as split axis
+                if (marginS > axisMargin)
                 {
-                    // bestSplitAxis = d;
-                    margin = axisMargin;
-                    chooseSplitAxisDistribution.clear();
-                    chooseSplitAxisDistribution = optimalDistributions;
+//                    splitAxis=dim;
+                    marginS = axisMargin;
+                    chooseSplitAxisListOfPairs.clear();
+                    for (Pair pair : optimalPairs) {
+                        chooseSplitAxisListOfPairs.add(pair);
+                    }
                 }
             }
         }
-        return chooseSplitAxisDistribution;
+//        System.out.println(splitAxis);
+//        System.out.println(chooseSplitAxisListOfPairs.size());
+//        System.out.println(marginS);
+        return chooseSplitAxisListOfPairs;
     }
 
-    public List<Node> chooseSplitIndex (List<Pair<ArrayList<Entry>, ArrayList<Entry>>> chooseSplitAxisDistribution, int level) {
+    // Algorithm ChooseSplitIndex
+    public Pair<ArrayList<Entry>, ArrayList<Entry>> chooseSplitIndex (List<Pair<ArrayList<Entry>, ArrayList<Entry>>> chooseSplitAxisDistribution) {
         // compute the overlap of each pair and store in a hashmap as value
         // with key the index of list that contains the pairs
+
+
+
+//        for (int i = 0; i<chooseSplitAxisDistribution.size(); i++) {
+//            System.out.println("first groupHA");
+//            for (Entry entry : chooseSplitAxisDistribution.get(i).getFirst()) {
+//                entry.showEntry();
+//            }
+//            System.out.println();
+//            System.out.println("second group");
+//            for (Entry entry : chooseSplitAxisDistribution.get(i).getSecond()) {
+//                entry.showEntry();
+//            }
+//            System.out.println();
+//            System.out.println();
+//            System.out.println();
+//        }
+
+
+
         HashMap<Integer, Double> overlap = new HashMap<>();
         for (int i=0; i<chooseSplitAxisDistribution.size(); i++) {
             BoundingBox firstGroupBoundingBox = new BoundingBox();
@@ -324,30 +396,46 @@ public class RAsteriskTree {
         if (overlapList.size()>1) {
             double smallestArea = Double.MAX_VALUE;
             for (int i=0; i<overlapList.size(); i++) {
-                ArrayList<Entry> merged = new ArrayList<>();
-                merged.addAll(chooseSplitAxisDistribution.get(overlapList.get(i).getKey()).getFirst());
-                merged.addAll(chooseSplitAxisDistribution.get(overlapList.get(i).getKey()).getSecond());
-                BoundingBox box = new BoundingBox();
-                box.createBoundingBoxOfEntries(merged);
-                double area = box.computeArea();
+//                ArrayList<Entry> merged = new ArrayList<>();
+//                merged.addAll(chooseSplitAxisDistribution.get(overlapList.get(i).getKey()).getFirst());
+//                merged.addAll(chooseSplitAxisDistribution.get(overlapList.get(i).getKey()).getSecond());
+//                BoundingBox box = new BoundingBox();
+//                box.createBoundingBoxOfEntries(merged);
+                BoundingBox firstBoundingBox = new BoundingBox();
+                firstBoundingBox.createBoundingBoxOfEntries(chooseSplitAxisDistribution.get(overlapList.get(i).getKey()).getFirst());
+                BoundingBox secondBoundingBox = new BoundingBox();
+                secondBoundingBox.createBoundingBoxOfEntries(chooseSplitAxisDistribution.get(overlapList.get(i).getKey()).getSecond());
+                double area = firstBoundingBox.computeArea() + secondBoundingBox.computeArea();
+//                System.out.println("first group");
+//                for (Entry entry : chooseSplitAxisDistribution.get(overlapList.get(i).getKey()).getFirst()){
+//                    entry.showEntry();
+//                }
+//                System.out.println();
+//                System.out.println("second group");
+//                for (Entry entry : chooseSplitAxisDistribution.get(overlapList.get(i).getKey()).getSecond()){
+//                    entry.showEntry();
+//                }
+//                System.out.println(area);
+//
+//                System.out.println();
+//                System.out.println();
+//                System.out.println();
                 if (area<smallestArea) {
                     smallestArea = area;
                     index=i;
                 }
             }
         }
-        ArrayList<Node> splitNodes = new ArrayList<>();
-        Node firstNode = new Node(level, false);
-        firstNode.setEntries(chooseSplitAxisDistribution.get(index).getFirst());
-        Node secondNode = new Node(level, false);
-        secondNode.setEntries(chooseSplitAxisDistribution.get(index).getSecond());
-        splitNodes.add(firstNode);
-        splitNodes.add(secondNode);
-        return splitNodes;
-
+        return chooseSplitAxisDistribution.get(index);
+//        ArrayList<Node> splitNodes = new ArrayList<>();
+//        Node firstNode = new Node(level);
+//        firstNode.setEntries(chooseSplitAxisDistribution.get(index).getFirst());
+//        Node secondNode = new Node(level);
+//        secondNode.setEntries(chooseSplitAxisDistribution.get(index).getSecond());
+//        splitNodes.add(firstNode);
+//        splitNodes.add(secondNode);
+//        return splitNodes;
     }
-
-
 }
 
 class Pair<T1, T2> {

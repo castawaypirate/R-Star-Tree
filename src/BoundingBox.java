@@ -1,3 +1,4 @@
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 
 public class BoundingBox {
@@ -13,6 +14,7 @@ public class BoundingBox {
     }
 
     public void showBoundingBox() {
+        System.out.println("Bounding Box:");
         for(int i=0;i<bounds.size();i++) {
             System.out.println("Bounds in dimension " + (i+1) + ": " + bounds.get(i).getUpperBound() + ", " + bounds.get(i).getLowerBound());
         }

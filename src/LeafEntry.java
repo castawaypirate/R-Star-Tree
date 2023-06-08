@@ -2,7 +2,8 @@ public class LeafEntry extends Entry {
     public long recordId;
 
     public LeafEntry(long recordId, BoundingBox boundingBox) {
-        super(boundingBox);
+        super();
+        super.setBoundingBox(boundingBox);
         this.recordId = recordId;
     }
 
