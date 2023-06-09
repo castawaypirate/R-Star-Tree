@@ -1,7 +1,5 @@
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
@@ -9,23 +7,45 @@ public class Main {
         // insert testing
         RAsteriskTree tree = new RAsteriskTree(2);
 
-        Record r1 = new Record(1, "1", new ArrayList<Double>(Arrays.asList(0.0,0.0)));
+        Record r1 = new Record(1, "1", new ArrayList<Double>(Arrays.asList(1.0, 1.0)));
         tree.insertData(r1);
 
-        Record r2 = new Record(2, "2", new ArrayList<Double>(Arrays.asList(6.0,6.0)));
+        Record r2 = new Record(2, "2", new ArrayList<Double>(Arrays.asList(2.0, 2.0)));
         tree.insertData(r2);
 
-        Record r3 = new Record(3, "3", new ArrayList<Double>(Arrays.asList(5.0,5.0)));
+        Record r3 = new Record(3, "3", new ArrayList<Double>(Arrays.asList(3.0, 3.0)));
         tree.insertData(r3);
 
-        Record r4 = new Record(4, "4", new ArrayList<Double>(Arrays.asList(1.0,1.0)));
+        Record r4 = new Record(4, "4", new ArrayList<Double>(Arrays.asList(777.0, 777.0)));
         tree.insertData(r4);
 
-        Record r5 = new Record(5, "5", new ArrayList<Double>(Arrays.asList(7.0,7.0)));
-        tree.insertData(r5);
+        tree.showTree();
 
-        Record r6 = new Record(6, "6", new ArrayList<Double>(Arrays.asList(700.0,700.0)));
-        tree.insertData(r6);
+//        Record r5 = new Record(5, "5", new ArrayList<Double>(Arrays.asList(5.0, 5.0)));
+//        tree.insertData(r5);
+//
+//        Record r6 = new Record(6, "6", new ArrayList<Double>(Arrays.asList(6.0, 6.0)));
+//        tree.insertData(r6);
+//
+//        Record r7 = new Record(7, "7", new ArrayList<Double>(Arrays.asList(7.0, 7.0)));
+//        tree.insertData(r7);
+//
+//        Record r8 = new Record(8, "8", new ArrayList<Double>(Arrays.asList(8.0, 8.0)));
+//        tree.insertData(r8);
+//
+//        Record r9 = new Record(9, "9", new ArrayList<Double>(Arrays.asList(9.0, 9.0)));
+//        tree.insertData(r9);
+//
+//        Record r10 = new Record(10, "10", new ArrayList<Double>(Arrays.asList(10.0, 10.0)));
+//        tree.insertData(r10);
+//
+//        Record r11 = new Record(11, "11", new ArrayList<Double>(Arrays.asList(11.0, 11.0)));
+//        tree.insertData(r11);
+//
+//        Record r12 = new Record(12, "12", new ArrayList<Double>(Arrays.asList(12.0, 12.0)));
+//        tree.insertData(r12);
+
+
 
 //        for (Entry entry : tree.getRoot().getEntries()) {
 //            entry.getBoundingBox().showBoundingBox();
@@ -38,13 +58,10 @@ public class Main {
 //        A.showEntry();
 //        System.out.println(A.getChildNode().getEntries().size());
 
-        System.out.println("Entry B of Node");
-        Entry B = tree.getRoot().getEntries().get(1);
-        B.showEntry();
-        System.out.println(B.getChildNode().getEntries().get(0).getChildNode().getEntries().size());
-        B.getChildNode().getEntries().get(0).getChildNode().getEntries().get(0).showEntry();
-        B.getChildNode().getEntries().get(1).getChildNode().getEntries().get(0).showEntry();
-        B.getChildNode().getEntries().get(1).getChildNode().getEntries().get(1).showEntry();
+//        Entry B = tree.getRoot().getEntries().get(1);
+//        B.getChildNode().getEntries().get(0).getChildNode().getEntries().get(0).showEntry();
+//        B.getChildNode().getEntries().get(1).getChildNode().getEntries().get(0).showEntry();
+//        B.getChildNode().getEntries().get(1).getChildNode().getEntries().get(1).showEntry();
 
 
 

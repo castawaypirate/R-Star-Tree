@@ -10,6 +10,21 @@ public class Node {
         this.level = level;
     }
 
+    public String getBoundingBoxInString(int dimensions) {
+        BoundingBox boundingBox = getNodeBoundingBox();
+        StringBuilder boundingBoxString = new StringBuilder("(");
+        for (int i = 0; i < dimensions; i++) {
+            boundingBoxString.append("Dimension ").append(i + 1)
+                    .append(": ").append(boundingBox.getBounds().get(i).getLowerBound())
+                    .append(", ").append(boundingBox.getBounds().get(i).getUpperBound());
+            if (i < dimensions - 1) {
+                boundingBoxString.append(", ");
+            }
+        }
+        boundingBoxString.append(")");
+        return boundingBoxString.toString();
+    }
+
     public ArrayList<Entry> getEntries() {
         return entries;
     }
@@ -215,7 +230,6 @@ public class Node {
         for (Map.Entry<Entry, Double> entry : entryList) {
             sortedEntries.add(entry.getKey());
         }
-
         return sortedEntries;
     }
 }

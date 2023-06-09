@@ -1,4 +1,3 @@
-import java.sql.SQLOutput;
 import java.util.ArrayList;
 
 public class BoundingBox {
@@ -19,6 +18,7 @@ public class BoundingBox {
             System.out.println("Bounds in dimension " + (i+1) + ": " + bounds.get(i).getUpperBound() + ", " + bounds.get(i).getLowerBound());
         }
     }
+
 
     public ArrayList<Bounds> getBounds() {
         return bounds;
@@ -80,24 +80,25 @@ public class BoundingBox {
     }
 
     public void createBoundingBoxOfEntries(ArrayList<Entry> entries) {
-        // Initialize the bounds with the values from the first entry
+        bounds.clear();
+        // initialize the bounds with the values from the first entry
         Entry firstEntry = entries.get(0);
         ArrayList<Bounds> firstEntryBounds = firstEntry.getBoundingBox().getBounds();
         for (Bounds bound : firstEntryBounds) {
             bounds.add(new Bounds(bound.getUpperBound(), bound.getLowerBound()));
         }
 
-        // Iterate over the remaining entries and update the bounds
+        // iterate over the remaining entries and update the bounds
         for (int i = 1; i < entries.size(); i++) {
             Entry entry = entries.get(i);
             ArrayList<Bounds> entryBounds = entry.getBoundingBox().getBounds();
 
-            // Update the bounds for each dimension
+            // update the bounds for each dimension
             for (int j = 0; j < bounds.size(); j++) {
                 Bounds currentBounds = bounds.get(j);
                 Bounds entryBound = entryBounds.get(j);
 
-                // Update the upper and lower bounds if necessary
+                // update the upper and lower bounds if necessary
                 if (entryBound.getUpperBound() > currentBounds.getUpperBound()) {
                     currentBounds.setUpperBound(entryBound.getUpperBound());
                 }
@@ -106,7 +107,6 @@ public class BoundingBox {
                 }
             }
         }
-
         center = computeCenter();
     }
 

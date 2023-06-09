@@ -1,7 +1,5 @@
 import java.io.*;
 import java.util.ArrayList;
-import java.lang.instrument.Instrumentation;
-
 
 public class FileManager {
     private final static String pathToDatafile = ".\\resources\\datafile.dat";
@@ -40,7 +38,7 @@ public class FileManager {
         }
     }
 
-    //Returns the index of the block from the ArrayList blocks
+    // Returns the index of the block from the ArrayList blocks
     public int searchBlock(int blockId) {
         int index=0;
         for(int i=0;i<blocks.size();i++) {
@@ -69,7 +67,7 @@ public class FileManager {
 
         }else {
             Block block0 = new Block(0, "block0");
-            //set the number of records inside the datafile
+            // set the number of records inside the datafile
             block0.setNumberOfRecordsInsideDatafile(block0.getNumberOfRecordsInsideDatafile()+records.size());
 //            System.out.println("block0 bytes:" + getBytesOfObject(block0));
             blocks.add(block0);

@@ -2,7 +2,7 @@ import java.util.ArrayList;
 
 public class Entry {
     private BoundingBox boundingBox;
-    // node which the bounding box is corresponding to
+    // node to which the entry points to
     private Node childNode;
     // node in which the entry is in
     private Node parentNode;
