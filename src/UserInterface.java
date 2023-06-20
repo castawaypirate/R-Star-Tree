@@ -1,3 +1,4 @@
+import java.sql.SQLOutput;
 import java.util.Scanner;
 
 public class UserInterface {
@@ -14,8 +15,9 @@ public class UserInterface {
         Scanner sc = new Scanner(System.in);
         System.out.println("Type 1 for Bulk Loading");
         System.out.println("Type 2 to insert a record");
+        System.out.println("Type O to convert osm to csv");
         System.out.println("Type 0 to exit");
-        char c = '1';
+        char c = 'O';
 //        char c = sc.nextLine().charAt(0);
 //        while(c != '0' && c != '1' && c != '2'){
 //            System.out.println(c + " is an invalid command! Try again!");
@@ -30,10 +32,10 @@ public class UserInterface {
             tree.bulkLoading(".\\resources\\data.csv");
         }else if(c == '2'){
 
+        }else if(c== 'O'){
+            System.out.println("OSM to CSV processing...");
+            OSMToCSV oc = new OSMToCSV();
+            oc.searchFiles(".\\resources\\");
         }
-    }
-
-    public void insertRecord(){
-
     }
 }

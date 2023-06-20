@@ -4,22 +4,25 @@ import java.util.Arrays;
 public class Main {
     public static void main(String[] args) {
 
-        // insert testing
-        RAsteriskTree tree = new RAsteriskTree(2);
+        UserInterface in = new UserInterface();
+        in.init("2");
 
-        Record r1 = new Record(1, "1", new ArrayList<Double>(Arrays.asList(1.0, 1.0)));
-        tree.insertData(r1);
-
-        Record r2 = new Record(2, "2", new ArrayList<Double>(Arrays.asList(2.0, 2.0)));
-        tree.insertData(r2);
-
-        Record r3 = new Record(3, "3", new ArrayList<Double>(Arrays.asList(3.0, 3.0)));
-        tree.insertData(r3);
-
-        Record r4 = new Record(4, "4", new ArrayList<Double>(Arrays.asList(777.0, 777.0)));
-        tree.insertData(r4);
-
-        tree.showTree();
+//        // insert testing
+//        RAsteriskTree tree = new RAsteriskTree(2);
+//
+//        Record r1 = new Record(1, "1", new ArrayList<Double>(Arrays.asList(1.0, 1.0)));
+//        tree.insertData(r1);
+//
+//        Record r2 = new Record(2, "2", new ArrayList<Double>(Arrays.asList(2.0, 2.0)));
+//        tree.insertData(r2);
+//
+//        Record r3 = new Record(3, "3", new ArrayList<Double>(Arrays.asList(3.0, 3.0)));
+//        tree.insertData(r3);
+//
+//        Record r4 = new Record(4, "4", new ArrayList<Double>(Arrays.asList(777.0, 777.0)));
+//        tree.insertData(r4);
+//
+//        tree.showTree();
 
 //        Record r5 = new Record(5, "5", new ArrayList<Double>(Arrays.asList(5.0, 5.0)));
 //        tree.insertData(r5);
