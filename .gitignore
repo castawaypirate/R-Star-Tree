@@ -23,6 +23,7 @@
 hs_err_pid*
 
 ### IntelliJ IDEA ###
+src/META-INF/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/

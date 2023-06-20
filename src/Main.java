@@ -4,8 +4,24 @@ import java.util.Arrays;
 public class Main {
     public static void main(String[] args) {
 
-        UserInterface in = new UserInterface();
-        in.init("2");
+        //main
+//        args = new String[1];
+//        args[0]="2";
+//        System.out.println("welcome");
+//        if(args.length == 0){
+//            System.out.println("you need to give the number of dimensions as an argument my fellow companion");
+//        }else{
+//            System.out.println("dimensions: " + args[0]);
+//            UserInterface ui = new UserInterface();
+//            ui.init(args[0]);
+//        }
+
+//        FileManager f = new FileManager(2);
+//        Record r1 = new Record(1, "1", new ArrayList<Double>(Arrays.asList(1.0, 1.0)));
+//        f.writeRecordToDatafile(r1);
+
+//        UserInterface in = new UserInterface();
+//        in.init("2");
 
 //        // insert testing
 //        RAsteriskTree tree = new RAsteriskTree(2);
@@ -456,16 +472,6 @@ public class Main {
 //        node.showEntries();
 
 
-        //main
-//        args = new String[1];
-//        args[0]="2";
-//        System.out.println("Let's go!");
-//        if(args.length == 0){
-//            System.out.println("You need to give the number of dimensions as an argument my fellow companion");
-//        }else{
-//            System.out.println("Dimensions : " + args[0]);
-//            UserInterface ui = new UserInterface();
-//            ui.init(args[0]);
-//        }
+
     }
 }

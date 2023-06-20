@@ -15,30 +15,30 @@ public class RAsteriskTree {
     private int M;
     // minimum entries per node
     private int m;
-    private int numberOfEntriesInTheTree;
-    public RAsteriskTree(int dimensions){
+    public RAsteriskTree(int dimensions, FileManager fileManager){
         this.dimensions = dimensions;
-        fileManager = new FileManager(dimensions);
+        this.fileManager = fileManager;
         // create root at level 1
         rootLevel=1;
         root = new Node(rootLevel);
         // set overflow treatment false for level 1
         otInLevel.add(false);
-        numberOfEntriesInTheTree = 0;
         M=3;
         m=1;
+    }
+
+    public int getDimensions(){
+        return dimensions;
     }
 
     public Node getRoot() {
         return root;
     }
 
-    public int getNumberOfEntriesInTheTree () {
-        return numberOfEntriesInTheTree;
-    }
-
     public void showTree() {
+        System.out.println();
         showNode(root, "");
+        System.out.println();
     }
 
     private void showNode(Node node, String indent) {
@@ -50,7 +50,7 @@ public class RAsteriskTree {
             for (Entry entry : node.getEntries()) {
                 if (entry instanceof LeafEntry) {
                     LeafEntry leafEntry = (LeafEntry) entry;
-                    System.out.println(indent + "Leaf Entry: Record ID - " + leafEntry.getEntryId());
+                    System.out.println(indent + "Leaf Entry: Record ID: " + leafEntry.getLeafEntryId());
                 } else {
                     Node childNode = entry.getChildNode();
                     System.out.println(indent + "Index Node:");
@@ -63,9 +63,10 @@ public class RAsteriskTree {
     public void bulkLoading(String CSVfilePath){
         // must do or the entries must be sorted, only time will tell
         // look the recordings for clues for the bulk loading
-        ArrayList<Record> sortedRecords = fileManager.readDataFromCSVFile(CSVfilePath);
-        fileManager.writeToDatafile(sortedRecords);
-        insertData(new Record(632980450, "632980450", new ArrayList<Double>(Arrays.asList(41.5448493,26.5947027))));
+        System.out.println(CSVfilePath);
+//        insertData(new Record(632980450, "632980450", new ArrayList<Double>(Arrays.asList(41.5448493,26.5947027))));
+//        ArrayList<Record> sortedRecords = fileManager.readDataFromCSVFile(CSVfilePath);
+//        fileManager.writeToDatafile(sortedRecords);
     }
 
     // Takes a record as a parameter, makes a leaf entry out of it
@@ -80,7 +81,7 @@ public class RAsteriskTree {
         // parameter, to insert a new data rectangle
         // CS1 Set N to be the root (as we pass the root as the node to add)
         insert(new LeafEntry(record.getId(), new BoundingBox(boundsInEachDimension)), root, leafLevel);
-        numberOfEntriesInTheTree++;
+        fileManager.writeRecordToDatafile(record);
     }
 
     public Node insert(Entry entry, Node node, int level) {

@@ -18,7 +18,7 @@ public class LeafEntry extends Entry {
         super.showEntry();
     }
 
-    public long getEntryId() {
+    public long getLeafEntryId() {
         return recordId;
     }
 }

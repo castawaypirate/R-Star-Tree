@@ -4,10 +4,8 @@ import java.util.ArrayList;
 public class Block implements Serializable{
     private final int blockid;
     private final String blockname;
-    private int numberOfBlocks;
     private int numberOfRecordsInsideDatafile;
     private ArrayList<Record> records;
-    // more thought must be applied here
     private ArrayList<Entry> entries;
 
     public Block(int blockid, String blockname){
@@ -26,14 +24,6 @@ public class Block implements Serializable{
 
     public String getBlockname() {
         return blockname;
-    }
-
-    public int getNumberOfBlocks() {
-        return numberOfBlocks;
-    }
-
-    public void setNumberOfBlocks(int numberOfBlocks) {
-        this.numberOfBlocks = numberOfBlocks;
     }
 
     public int getNumberOfRecordsInsideDatafile() {
@@ -56,7 +46,7 @@ public class Block implements Serializable{
             }
         }
     }
-    public int getNumberOfRecordsInTheBlock(){
+    public int getNumberOfRecordsInsideBlock(){
         return records.size();
     }
 
@@ -69,5 +59,17 @@ public class Block implements Serializable{
             }
         }
         return record;
+    }
+
+    public void showRecordsInBlock() {
+        System.out.println("--------------------");
+        System.out.println("Block ID: " + blockid);
+        for (Record record : records) {
+            System.out.println("--------------------");
+            System.out.println("Record ID: " + record.getId());
+            System.out.println("Name: " + record.getName());
+            System.out.println("Coordinates: " + record.getCoordinates());
+            System.out.println("--------------------");
+        }
     }
 }

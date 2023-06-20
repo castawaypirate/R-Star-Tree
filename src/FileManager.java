@@ -1,20 +1,24 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class FileManager {
     private final static String pathToDatafile = ".\\resources\\datafile.dat";
+    private final static String pathToIndexfile = ".\\resources\\indexfile.dat";
     private static final int maxBlockSize = 32*1024;
+    private int maxNumberOfRecordsInBlock;
     private ArrayList<Block> blocks;
     private int dimensions;
-    private File datafile;
     public FileManager(int dimensions){
         this.dimensions=dimensions;
         this.blocks=new ArrayList<>();
+        maxNumberOfRecordsInBlock = computeMaximumNumberOfRecordsInABlock();
+        maxNumberOfRecordsInBlock = 3;
     }
 
-    public ArrayList<Record> readDataFromCSVFile(String CSVfilePath){
+    public ArrayList<Record> readDataFromCSVFile(String CSVFilePath){
         ArrayList<Record> records = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(CSVfilePath))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(CSVFilePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] row = line.split(",");
@@ -50,15 +54,42 @@ public class FileManager {
         return index;
     }
 
-    public ArrayList<Block> readDatafile() {
-        ArrayList<Block> blocksFromDatafile = new ArrayList<>();
+    public void readDatafile() {
         try (FileInputStream fileInputStream = new FileInputStream(pathToDatafile);
-             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
-            blocksFromDatafile = (ArrayList<Block>) objectInputStream.readObject();
+            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
+            blocks = (ArrayList<Block>) objectInputStream.readObject();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
-        return blocksFromDatafile;
+    }
+
+    public void createDatafile() {
+        Block block0 = new Block(0, "block0");
+        Block block1 = new Block(1, "block1");
+        blocks.add(block0);
+        blocks.add(block1);
+        writeObjectToDatafile(blocks);
+    }
+
+    public void writeRecordToDatafile(Record record){
+        if(!datafileExists()) {
+            System.out.println("Initialize datafile.dat");
+            createDatafile();
+        }
+        readDatafile();
+        Block blockToAdd = null;
+        for(int i=1;i<blocks.size();i++){
+            if(blocks.get(i).getNumberOfRecordsInsideBlock()<maxNumberOfRecordsInBlock){
+                blockToAdd = blocks.get(i);
+                break;
+            }
+        }
+        if(blockToAdd == null){
+            blockToAdd = new Block(blocks.size(), "block"+blocks.size());
+            blocks.add(blockToAdd);
+        }
+        blockToAdd.addRecordToBlock(record);
+        writeObjectToDatafile(blocks);
     }
 
     public void writeToDatafile(ArrayList<Record> records){
@@ -68,16 +99,15 @@ public class FileManager {
         }else {
             Block block0 = new Block(0, "block0");
             // set the number of records inside the datafile
-            block0.setNumberOfRecordsInsideDatafile(block0.getNumberOfRecordsInsideDatafile()+records.size());
+//            block0.setNumberOfRecordsInsideDatafile(block0.getNumberOfRecordsInsideDatafile()+records.size());
 //            System.out.println("block0 bytes:" + getBytesOfObject(block0));
             blocks.add(block0);
 //            System.out.println("blocks bytes:" + getBytesOfObject(blocks));
-            int maxRecordsPerBlock = numberOfRecordsInABlock(records.get(records.size()-1));
 //            System.out.println(maxRecordsPerBlock);
             int blockId = 1;
             for(int i=0;i<records.size();i++) {
                 Block block = new Block(blockId, "block"+blockId);
-                for(int j=0;j<maxRecordsPerBlock;j++) {
+                for(int j=0;j<maxNumberOfRecordsInBlock;j++) {
                     records.get(i).setBlockId(blockId);
 //                    System.out.println(getBytesOfObject(records.get(i)));
                     block.addRecordToBlock(records.get(i));
@@ -100,38 +130,31 @@ public class FileManager {
         // node na to grapseis sto indexfile.dat
     }
 
-    public int numberOfRecordsInABlock(Record record){
-        Block block = new Block(1,"block1");
-//        System.out.println(getBytesOfObject(record));
+    // Adds records to block, and then it serializes it to find its length
+    // in bytes. When it surpasses maxBlockSize returns number of records
+    // that can fit in a block
+    public int computeMaximumNumberOfRecordsInABlock(){
+        Block block = new Block(0,"testBlock");
+        ArrayList<Double> coordinates = new ArrayList<>();
+        for(int i=0;i<dimensions;i++){
+            coordinates.add(Double.MAX_VALUE);
+        }
+        Record testRecord = new Record(0, "testRecord", coordinates);
         int maxRecords = 0;
         for(int i=0;i<Integer.MAX_VALUE;i++){
-//            ArrayList<Double> coordinates = new ArrayList<>();
-//            for(int j=1;j<=dimensions;j++){
-//                //maybe use random to set the coordinates for each record
-//                coordinates.add(0.0);
-//            }
-//            Record record = new Record(0,"0", coordinates);
-//            System.out.println(getBytesOfObject(record));
-//            block.addRecordToBlock(new Record(0,"0", coordinates));
-            block.addRecordToBlock(record);
+            block.addRecordToBlock(testRecord);
             byte[] blockInBytes;
             try{
+                // serialize block
                 blockInBytes = serialize(block);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
             if(blockInBytes.length>maxBlockSize){
-//                System.out.println(blockInBytes.length);
                 maxRecords=i;
                 break;
             }
         }
-//        System.out.println(maxRecords);
-//        System.out.println(block.getRecords().size());
-//        System.out.println(getBytesOfObject(block));
-//        block.removeRecordFromBlock(record.getId());
-//        block.removeRecordFromBlock(0);
-//        writeObjectToDatafile(block);
         return maxRecords;
     }
 
@@ -141,8 +164,6 @@ public class FileManager {
             ObjectOutputStream objectOut = new ObjectOutputStream(fileOut);
             objectOut.writeObject(object);
             objectOut.close();
-            System.out.println("The Object  was successfully written to a file");
-
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -171,5 +192,42 @@ public class FileManager {
             return true;
         }
         return false;
+    }
+
+    public boolean indexfileExists(){
+        File f = new File(pathToIndexfile);
+        if(f.exists() && !f.isDirectory()) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean deleteIndexfile(){
+        File f = new File(pathToIndexfile);
+        return f.delete();
+    }
+
+    public boolean deleteDatafile(){
+        File f = new File(pathToDatafile);
+        return f.delete();
+    }
+
+    public List<File> getCSVFiles(String directoryPath) {
+        File directory = new File(directoryPath);
+        List<File> csvFiles = null;
+        if (directory.isDirectory()) {
+            File[] files = directory.listFiles((dir, name) -> name.toLowerCase().endsWith(".csv"));
+            if (files != null) {
+                csvFiles = new ArrayList<>();
+                for (File file : files) {
+                    if (file.isFile()) {
+                        csvFiles.add(file);
+                    }
+                }
+            }
+        } else {
+            System.out.println("invalid directory");
+        }
+        return csvFiles;
     }
 }
