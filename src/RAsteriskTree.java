@@ -5,26 +5,30 @@ public class RAsteriskTree {
     private int dimensions;
     // an arraylist of boolean where true is stored if overflow treatment has occurred to a level
     private ArrayList<Boolean> otInLevel = new ArrayList<>();
-    private final static int leafLevel = 1;
-    //defines how many entries of a node should be used during ChooseSubtree
-    private final static int chooseSubtree_p = 32;
-    private final static int reinsert_p = 1;
     private Node root;
     private int rootLevel;
     // maximum entries per node
     private int M;
     // minimum entries per node
     private int m;
+    private final static int leafLevel = 1;
+    // defines how many entries of a node should be used during ChooseSubtree
+    private final static int chooseSubtree_p = 32;
+
+    private int reinsert_p;
     public RAsteriskTree(int dimensions, FileManager fileManager){
         this.dimensions = dimensions;
         this.fileManager = fileManager;
         // create root at level 1
-        rootLevel=1;
-        root = new Node(rootLevel);
+        rootLevel=leafLevel;
+        root = fileManager.getRoot(rootLevel);
         // set overflow treatment false for level 1
         otInLevel.add(false);
-        M=3;
-        m=1;
+        M = fileManager.getMaxNumberOfEntriesInBlock();
+        // 40% of M best performance
+        m = Math.max((int) Math.floor(0.4 * M), 1);
+        // 30% of M best performance
+        reinsert_p = Math.max((int) Math.floor(0.3 * M), 1);
     }
 
     public int getDimensions(){
@@ -81,7 +85,7 @@ public class RAsteriskTree {
         // parameter, to insert a new data rectangle
         // CS1 Set N to be the root (as we pass the root as the node to add)
         insert(new LeafEntry(record.getId(), new BoundingBox(boundsInEachDimension)), root, leafLevel);
-        fileManager.writeRecordToDatafile(record);
+//        fileManager.writeRecordToDatafile(record);
     }
 
     public Node insert(Entry entry, Node node, int level) {
@@ -89,12 +93,15 @@ public class RAsteriskTree {
         // I4 Adjust all covering rectangles in the insertion
         // path such that they are minimum bounding boxes
         // enclosing their children
-        node.adjustBoundingBoxToFitEntry(entry);
-
+        if(node.getLevel()!=rootLevel) {
+            node.adjustBoundingBoxToFitEntry(entry);
+            fileManager.writeNodeIndexfile(node);
+        }
         // CS2 If N is a leaf (return N)
         if (node.getLevel() == level) {
             // I2 If N has less than M entries, accommodate E in N
             node.addEntry(entry);
+            fileManager.writeNodeIndexfile(node);
         } else {
             // I1 Invoke ChooseSubtree, with the level as a parameter,
             // to find an appropriate node N, in which to place the
@@ -104,8 +111,8 @@ public class RAsteriskTree {
 
             if (nodeToAdd != null) {
                 node.addEntry(nodeToAdd.getParentEntry());
+                fileManager.writeNodeIndexfile(node);
             }
-
         }
         // I2 If N has M entries, invoke OverflowTreatment with the
         // level of N as a parameter [for reinsertion or split]
@@ -130,13 +137,25 @@ public class RAsteriskTree {
 
                     newRoot.addEntry(firstEntry);
                     newRoot.addEntry(secondEntry);
+                    // copy the blockid to the new root
+                    newRoot.setBlockid(root.getBlockid());
 
                     root = newRoot;
+
+                    fileManager.writeNodeIndexfile(root);
+                    // reset blockid
+                    node.setBlockid(0);
+                    fileManager.writeNodeIndexfile(node);
+                    fileManager.writeNodeIndexfile(secondNode);
                 } else {
                     // adjust bounding box of the existing node
                     BoundingBox newNodeBoundingBox = new BoundingBox();
                     newNodeBoundingBox.createBoundingBoxOfEntries(node.getEntries());
                     node.getParentEntry().setBoundingBox(newNodeBoundingBox);
+
+                    fileManager.writeNodeIndexfile(node);
+                    fileManager.writeNodeIndexfile(secondNode);
+
                     // I3 If OverflowTreatment was called and a split was performed, propagate
                     // OverflowTreatment upwards if necessary
                     return  secondEntry.getChildNode();
@@ -221,14 +240,13 @@ public class RAsteriskTree {
             distancesFromCenter.put(i, nodeBoundingBox.
                     computeDistanceBetweenCenters(node.getEntries().get(i).getBoundingBox().computeCenter()));
         }
+
         // RI2: Sort the items in decreasing order (or increasing order)
         // of their distances computed in RI1
 
-        // ***we are doing far reinsert***
-
         // convert the HashMap to a List of Map.Entry objects
         List<Map.Entry<Integer, Double>> entries = new ArrayList<>(distancesFromCenter.entrySet());
-        // sort the list in decreasing order of values
+        // sort the list in decreasing order of values (far reinsert)
         Collections.sort(entries, new Comparator<Map.Entry<Integer, Double>>() {
             @Override
             public int compare(Map.Entry<Integer, Double> entry1, Map.Entry<Integer, Double> entry2) {
@@ -250,6 +268,9 @@ public class RAsteriskTree {
         // adjust the bounding box of the parent entry of the node
         nodeBoundingBox.createBoundingBoxOfEntries(node.getEntries());
         node.getParentEntry().setBoundingBox(nodeBoundingBox);
+
+        fileManager.writeNodeIndexfile(node);
+
         // RI4 In the sort, defined in RI2, starting with the maximum distance
         // (= far reinsert) or minimum distance (= close reinsert), invoke Insert
         // to reinsert the entries
@@ -313,22 +334,6 @@ public class RAsteriskTree {
                         }
                     }
 
-
-//                    System.out.println("k:"+k);
-//                    System.out.println("first group");
-//                    for (Entry entry : firstGroup) {
-//                        entry.showEntry();
-//                    }
-//                    System.out.println();
-//                    System.out.println("second group");
-//                    for (Entry entry : secondGroup) {
-//                        entry.showEntry();
-//                    }
-//                    System.out.println();
-//                    System.out.println();
-//                    System.out.println();
-
-
                     // construct the bounding boxes of each group
                     BoundingBox firstGroupBoundingBox = new BoundingBox();
                     firstGroupBoundingBox.createBoundingBoxOfEntries(firstGroup);
@@ -340,12 +345,6 @@ public class RAsteriskTree {
                     // add the margin of the two bounding boxes of the two groups to the axisMargin
                     axisMargin += firstGroupBoundingBox.computeMargin() + secondGroupBoundingBox.computeMargin();
                 }
-
-
-//                System.out.println(dim);
-//                System.out.println(optimalPairs.size());
-//                System.out.println(axisMargin);
-
 
                 // CSA2 Choose the axis with the minimum S/marginS as split axis
                 if (marginS > axisMargin)
@@ -359,13 +358,6 @@ public class RAsteriskTree {
                 }
             }
         }
-
-
-//        System.out.println(splitAxis);
-//        System.out.println(chooseSplitAxisListOfPairs.size());
-//        System.out.println(marginS);
-
-
         return chooseSplitAxisListOfPairs;
     }
 
@@ -373,24 +365,6 @@ public class RAsteriskTree {
     public Pair<ArrayList<Entry>, ArrayList<Entry>> chooseSplitIndex (List<Pair<ArrayList<Entry>, ArrayList<Entry>>> chooseSplitAxisDistribution) {
         // compute the overlap of each pair and store in a hashmap as value
         // with key the index of list that contains the pairs
-
-
-//        for (int i = 0; i<chooseSplitAxisDistribution.size(); i++) {
-//            System.out.println("first groupHA");
-//            for (Entry entry : chooseSplitAxisDistribution.get(i).getFirst()) {
-//                entry.showEntry();
-//            }
-//            System.out.println();
-//            System.out.println("second group");
-//            for (Entry entry : chooseSplitAxisDistribution.get(i).getSecond()) {
-//                entry.showEntry();
-//            }
-//            System.out.println();
-//            System.out.println();
-//            System.out.println();
-//        }
-
-
         HashMap<Integer, Double> overlap = new HashMap<>();
         for (int i=0; i<chooseSplitAxisDistribution.size(); i++) {
             BoundingBox firstGroupBoundingBox = new BoundingBox();
@@ -419,7 +393,6 @@ public class RAsteriskTree {
                 iterator.remove();
             }
         }
-
         // resolve ties by choosing the distribution with the minimum area-value
         if (overlapList.size()>1) {
             double smallestArea = Double.MAX_VALUE;
@@ -429,23 +402,6 @@ public class RAsteriskTree {
                 BoundingBox secondBoundingBox = new BoundingBox();
                 secondBoundingBox.createBoundingBoxOfEntries(chooseSplitAxisDistribution.get(overlapList.get(i).getKey()).getSecond());
                 double area = firstBoundingBox.computeArea() + secondBoundingBox.computeArea();
-
-
-//                System.out.println("first group");
-//                for (Entry entry : chooseSplitAxisDistribution.get(overlapList.get(i).getKey()).getFirst()){
-//                    entry.showEntry();
-//                }
-//                System.out.println();
-//                System.out.println("second group");
-//                for (Entry entry : chooseSplitAxisDistribution.get(overlapList.get(i).getKey()).getSecond()){
-//                    entry.showEntry();
-//                }
-//                System.out.println(area);
-//                System.out.println();
-//                System.out.println();
-//                System.out.println();
-
-
                 if (area<smallestArea) {
                     smallestArea = area;
                     index=i;

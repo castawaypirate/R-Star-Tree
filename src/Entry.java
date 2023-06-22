@@ -1,6 +1,7 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Entry {
+public class Entry implements Serializable{
     private BoundingBox boundingBox;
     // node to which the entry points to
     private Node childNode;

@@ -1,9 +1,11 @@
+import java.io.Serializable;
 import java.util.*;
 
-public class Node {
+public class Node implements Serializable{
     private ArrayList<Entry> entries;
     private int level;
     private Entry parentEntry;
+    private int blockid;
 
     public Node(int level) {
         this.entries = new ArrayList<>();
@@ -46,6 +48,13 @@ public class Node {
         entries.add(entry);
     }
 
+    public int getBlockid(){
+        return blockid;
+    }
+
+    public void setBlockid(int blockid){
+        this.blockid=blockid;
+    }
     public void showEntries() {
         for(int i=0; i<entries.size(); i++) {
             System.out.println("Entry in index " + i +":");

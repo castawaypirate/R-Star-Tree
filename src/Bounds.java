@@ -1,4 +1,6 @@
-public class Bounds {
+import java.io.Serializable;
+
+public class Bounds implements Serializable{
 
     private Double upperBound;
     private Double lowerBound;

@@ -1,6 +1,7 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class BoundingBox {
+public class BoundingBox implements Serializable{
     private ArrayList<Bounds> bounds;
     private ArrayList<Double> center;
     public BoundingBox(ArrayList<Bounds> bounds) {
