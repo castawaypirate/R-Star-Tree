@@ -18,7 +18,7 @@ public class Main {
 
         FileManager fileManager = new FileManager(2);
         RAsteriskTree tree = new RAsteriskTree(2, fileManager);
-//
+
 //        Record r1 = new Record(1, "1", new ArrayList<Double>(Arrays.asList(1.0, 1.0)));
 //        tree.insertData(r1);
 //
@@ -35,9 +35,9 @@ public class Main {
 //        tree.insertData(r5);
 
         tree.showTree();
-//
+
         fileManager.readIndexfileTest();
-//        fileManager.readDatafile();
+        fileManager.readDatafileTest();
 
 
 //        FileManager f = new FileManager(2);

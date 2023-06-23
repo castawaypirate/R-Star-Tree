@@ -49,14 +49,14 @@ public class DataBlock extends Block{
     }
 
     public void showRecordsInBlock() {
-        System.out.println("--------------------");
-        System.out.println("Block ID: " + super.getBlockid());
+        System.out.println("-----------------------------------");
+        System.out.println("DataBlock ID: " + super.getBlockid());
         for (Record record : records) {
-            System.out.println("--------------------");
+            System.out.println("-----------------------------------");
             System.out.println("Record ID: " + record.getId());
             System.out.println("Name: " + record.getName());
             System.out.println("Coordinates: " + record.getCoordinates());
-            System.out.println("--------------------");
+            System.out.println("-----------------------------------");
         }
     }
 

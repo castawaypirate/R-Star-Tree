@@ -94,15 +94,6 @@ public class FileManager {
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
-//        for(DataBlock block : datafileBlocks) {
-//            System.out.println("-----------------------------------");
-//            System.out.println("Block ID: " + block.getBlockid());
-//            System.out.println("-----------------------------------");
-//            if(!block.getRecords().isEmpty()){
-//                block.showRecordsInBlock();
-//                System.out.println("-----------------------------------");
-//            }
-//        }
     }
 
     public void readIndexfile() {
@@ -122,11 +113,28 @@ public class FileManager {
             e.printStackTrace();
         }
         for(IndexBlock block : indexfileBlocks) {
+            System.out.println();
             System.out.println("-----------------------------------");
-            System.out.println("Block ID: " + block.getBlockid());
+            System.out.println("IndexBlock ID: " + block.getBlockid());
             System.out.println("-----------------------------------");
             if(block.getNodeOfBlock()!=null){
                 block.getNodeOfBlock().showEntries();
+                System.out.println("-----------------------------------");
+            }
+        }
+    }
+
+    public void readDatafileTest() {
+        try (FileInputStream fileInputStream = new FileInputStream(pathToDatafile);
+             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
+            datafileBlocks = (ArrayList<DataBlock>) objectInputStream.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        for(DataBlock block : datafileBlocks) {
+            System.out.println();
+            if(!block.getRecords().isEmpty()){
+                block.showRecordsInBlock();
                 System.out.println("-----------------------------------");
             }
         }

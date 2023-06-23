@@ -87,7 +87,7 @@ public class RAsteriskTree {
         fileManager.readIndexfile();
         insert(new LeafEntry(record.getId(), new BoundingBox(boundsInEachDimension)), root, leafLevel);
         fileManager.writeToIndexfile();
-//        fileManager.writeRecordToDatafile(record);
+        fileManager.writeRecordToDatafile(record);
     }
 
     public Node insert(Entry entry, Node node, int level) {
@@ -97,15 +97,14 @@ public class RAsteriskTree {
         // enclosing their children
         if(node.getLevel()!=rootLevel) {
             node.adjustBoundingBoxToFitEntry(entry);
+            // update bounding box of node in the indexblock
             fileManager.createUpdateIndexBlock(node);
-//            fileManager.writeNodeIndexfile(node);
         }
         // CS2 If N is a leaf (return N)
         if (node.getLevel() == level) {
             // I2 If N has less than M entries, accommodate E in N
             node.addEntry(entry);
             fileManager.createUpdateIndexBlock(node);
-//            fileManager.writeNodeIndexfile(node);
         } else {
             // I1 Invoke ChooseSubtree, with the level as a parameter,
             // to find an appropriate node N, in which to place the
@@ -117,7 +116,6 @@ public class RAsteriskTree {
                 node.addEntry(nodeToAdd.getParentEntry());
             }
             fileManager.createUpdateIndexBlock(node);
-//            fileManager.writeNodeIndexfile(node);
         }
         // I2 If N has M entries, invoke OverflowTreatment with the
         // level of N as a parameter [for reinsertion or split]
@@ -142,18 +140,13 @@ public class RAsteriskTree {
 
                     newRoot.addEntry(firstEntry);
                     newRoot.addEntry(secondEntry);
+
                     // copy the blockid to the new root
                     newRoot.setBlockid(root.getBlockid());
-
                     root = newRoot;
 
-//                    fileManager.writeNodeIndexfile(root);
-                    // reset blockid
-//                    node.setBlockid(0);
-//                    fileManager.writeNodeIndexfile(node);
-//                    fileManager.writeNodeIndexfile(secondNode);
-
                     fileManager.createUpdateIndexBlock(root);
+                    // reset blockid
                     node.setBlockid(0);
                     fileManager.createUpdateIndexBlock(node);
                     fileManager.createUpdateIndexBlock(secondNode);
@@ -165,8 +158,6 @@ public class RAsteriskTree {
 
                     fileManager.createUpdateIndexBlock(node);
                     fileManager.createUpdateIndexBlock(secondNode);
-//                    fileManager.writeNodeIndexfile(node);
-//                    fileManager.writeNodeIndexfile(secondNode);
 
                     // I3 If OverflowTreatment was called and a split was performed, propagate
                     // OverflowTreatment upwards if necessary
@@ -281,8 +272,8 @@ public class RAsteriskTree {
         nodeBoundingBox.createBoundingBoxOfEntries(node.getEntries());
         node.getParentEntry().setBoundingBox(nodeBoundingBox);
 
+        // update bounding box of node in the indexblock
         fileManager.createUpdateIndexBlock(node);
-//        fileManager.writeNodeIndexfile(node);
 
         // RI4 In the sort, defined in RI2, starting with the maximum distance
         // (= far reinsert) or minimum distance (= close reinsert), invoke Insert
