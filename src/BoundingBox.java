@@ -124,4 +124,53 @@ public class BoundingBox implements Serializable{
         return true; // overlap in all dimensions
     }
 
+    public double computeManhattanDistanceFromPoint(ArrayList<Double> point) {
+        double distance = 0.0;
+        ArrayList<Double> bottomLeftPoint = getBottomLeftPoint();
+
+        for (int i = 0; i < bottomLeftPoint.size(); i++) {
+            double diff = Math.abs(bottomLeftPoint.get(i) - point.get(i));
+            distance += diff;
+        }
+
+        return distance;
+    }
+
+    private ArrayList<Double> getBottomLeftPoint() {
+        ArrayList<Double> bottomLeftPoint = new ArrayList<>();
+        for (Bounds bound : bounds) {
+            bottomLeftPoint.add(bound.getLowerBound());
+        }
+        return bottomLeftPoint;
+    }
+
+    public boolean dominated(ArrayList<LeafEntry> skyline) {
+        for (LeafEntry entry : skyline) {
+            BoundingBox entryBoundingBox = entry.getBoundingBox();
+
+            // check if the entry's bounding box dominates the current bounding box
+            if (entryBoundingBox.dominates(this)) {
+                return true; // the current bounding box is dominated
+            }
+        }
+        return false; // the current bounding box is not dominated by any entry in the skyline
+    }
+
+    public boolean dominates(BoundingBox otherBox) {
+        ArrayList<Bounds> otherBounds = otherBox.getBounds();
+
+        for (int i = 0; i < bounds.size(); i++) {
+            Bounds currentBounds = bounds.get(i);
+            Bounds otherBound = otherBounds.get(i);
+
+            // Check if the current bounding box is not better in any dimension
+            if (currentBounds.getUpperBound() <= otherBound.getUpperBound()
+                    && currentBounds.getLowerBound() <= otherBound.getLowerBound()) {
+                return false; // The current bounding box does not dominate the other box in at least one dimension
+            }
+        }
+
+        return true; // The current bounding box dominates the other box in all dimensions
+    }
+
 }

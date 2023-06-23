@@ -441,7 +441,44 @@ public class RAsteriskTree {
     }
 
     public void branchAndBoundSkyline(){
+        // list of skyline points
+        ArrayList<LeafEntry> skyline = new ArrayList<>();
+        MinHeap<Entry> minHeap = new MinHeap<>();
+        // initialize origin
+        ArrayList<Double> origin = new ArrayList<>();
+        for(int i=0;i<dimensions;i++) {
+            origin.add(0.0);
+        }
+        // insert all entries of roo in the heap
+        for(Entry entry : root.getEntries()) {
+            minHeap.addObject(entry, entry.getBoundingBox().computeManhattanDistanceFromPoint(origin));
+        }
+        // while heap not empty
+        while(!minHeap.getSortedEntries().isEmpty()) {
+            // remove top entry
+            Entry entryToCheck = minHeap.getSortedEntries().get(0).getKey();
+            minHeap.getSortedEntries().remove(0);
+            // if entryToCheck is not dominated by any point in skyline list
+            if(!entryToCheck.getBoundingBox().dominated(skyline)) {
+                // if entryToCheck is not a leaf entry
+                if(!(entryToCheck instanceof LeafEntry)) {
+                    // for each child in entryToCheck
+                    for(Entry childEntry : entryToCheck.getChildNode().getEntries()) {
+                        // if child is not dominated by any point in skyline list
+                        if(!childEntry.getBoundingBox().dominated(skyline)) {
+                            // insert child into heap
+                            minHeap.addObject(childEntry, childEntry.getBoundingBox().computeManhattanDistanceFromPoint(origin));
+                        }
+                    }
+                } else { // entryToCheck if a leaf entry
+                    skyline.add((LeafEntry)entryToCheck);
+                }
+            }
+        }
 
+        for(LeafEntry entry : skyline) {
+            entry.showEntry();
+        }
     }
 }
 
@@ -460,5 +497,31 @@ class Pair<T1, T2> {
 
     public T2 getSecond() {
         return second;
+    }
+}
+
+
+class MinHeap<T> {
+    private List<Map.Entry<T, Double>> sortedEntries;
+
+    public MinHeap() {
+        sortedEntries = new ArrayList<>();
+    }
+
+    public void addObject(T object, double value) {
+        Map.Entry<T, Double> newEntry = new AbstractMap.SimpleEntry<>(object, value);
+        sortedEntries.add(newEntry);
+
+        // Sort the entries based on their values
+        Collections.sort(sortedEntries, new Comparator<Map.Entry<T, Double>>() {
+            @Override
+            public int compare(Map.Entry<T, Double> entry1, Map.Entry<T, Double> entry2) {
+                return entry1.getValue().compareTo(entry2.getValue());
+            }
+        });
+    }
+
+    public List<Map.Entry<T, Double>> getSortedEntries() {
+        return sortedEntries;
     }
 }
