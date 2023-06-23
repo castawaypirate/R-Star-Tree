@@ -22,7 +22,7 @@ public class FileManager {
         maxNumberOfEntriesInBlock = 3;
     }
 
-    public Node getRoot(int rootLevel) {
+    public Node getRoot() {
         if(!indexfileExists()) {
             System.out.println("initialize indexfile.dat");
             createIndexfile();
@@ -33,8 +33,8 @@ public class FileManager {
                 return indexfileBlocks.get(i).getNodeOfBlock();
             }
         }
-        // initialize root
-        Node root = new Node(rootLevel);
+        // create root at leaf level
+        Node root = new Node(1);
         // create block for root
         IndexBlock rootBlock = new IndexBlock(rootBlockid, "block" + rootBlockid);
         rootBlock.setNodeOfBlock(root);
@@ -130,6 +130,25 @@ public class FileManager {
                 System.out.println("-----------------------------------");
             }
         }
+    }
+
+    public void createUpdateIndexBlock(Node node){
+        IndexBlock blockToAdd = null;
+        for(IndexBlock indexBlock : indexfileBlocks){
+            if(indexBlock.getBlockid()==node.getBlockid() && indexBlock.getBlockid()!=0){
+                blockToAdd = indexBlock;
+                break;
+            }
+        }
+        if(blockToAdd == null){
+            blockToAdd = new IndexBlock(indexfileBlocks.size(), "block"+indexfileBlocks.size());
+            indexfileBlocks.add(blockToAdd);
+        }
+        blockToAdd.setNodeOfBlock(node);
+    }
+
+    public void writeToIndexfile(){
+        writeObjectToIndexfile(indexfileBlocks);
     }
 
     public void writeNodeIndexfile(Node node) {

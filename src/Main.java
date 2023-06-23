@@ -18,16 +18,16 @@ public class Main {
 
         FileManager fileManager = new FileManager(2);
         RAsteriskTree tree = new RAsteriskTree(2, fileManager);
-
-        Record r1 = new Record(1, "1", new ArrayList<Double>(Arrays.asList(1.0, 1.0)));
-        tree.insertData(r1);
-
-        Record r2 = new Record(2, "2", new ArrayList<Double>(Arrays.asList(2.0, 2.0)));
-        tree.insertData(r2);
-
-        Record r3 = new Record(3, "3", new ArrayList<Double>(Arrays.asList(3.0, 3.0)));
-        tree.insertData(r3);
-
+//
+//        Record r1 = new Record(1, "1", new ArrayList<Double>(Arrays.asList(1.0, 1.0)));
+//        tree.insertData(r1);
+//
+//        Record r2 = new Record(2, "2", new ArrayList<Double>(Arrays.asList(2.0, 2.0)));
+//        tree.insertData(r2);
+//
+//        Record r3 = new Record(3, "3", new ArrayList<Double>(Arrays.asList(3.0, 3.0)));
+//        tree.insertData(r3);
+//
 //        Record r4 = new Record(4, "4", new ArrayList<Double>(Arrays.asList(4.0, 4.0)));
 //        tree.insertData(r4);
 //

@@ -19,9 +19,9 @@ public class RAsteriskTree {
     public RAsteriskTree(int dimensions, FileManager fileManager){
         this.dimensions = dimensions;
         this.fileManager = fileManager;
-        // create root at level 1
-        rootLevel=leafLevel;
-        root = fileManager.getRoot(rootLevel);
+        // read or create root
+        root = fileManager.getRoot();
+        rootLevel= root.getLevel();
         // set overflow treatment false for level 1
         otInLevel.add(false);
         M = fileManager.getMaxNumberOfEntriesInBlock();
@@ -84,7 +84,9 @@ public class RAsteriskTree {
         // ID1 Invoke Insert starting with the leaf level as a
         // parameter, to insert a new data rectangle
         // CS1 Set N to be the root (as we pass the root as the node to add)
+        fileManager.readIndexfile();
         insert(new LeafEntry(record.getId(), new BoundingBox(boundsInEachDimension)), root, leafLevel);
+        fileManager.writeToIndexfile();
 //        fileManager.writeRecordToDatafile(record);
     }
 
@@ -95,13 +97,15 @@ public class RAsteriskTree {
         // enclosing their children
         if(node.getLevel()!=rootLevel) {
             node.adjustBoundingBoxToFitEntry(entry);
-            fileManager.writeNodeIndexfile(node);
+            fileManager.createUpdateIndexBlock(node);
+//            fileManager.writeNodeIndexfile(node);
         }
         // CS2 If N is a leaf (return N)
         if (node.getLevel() == level) {
             // I2 If N has less than M entries, accommodate E in N
             node.addEntry(entry);
-            fileManager.writeNodeIndexfile(node);
+            fileManager.createUpdateIndexBlock(node);
+//            fileManager.writeNodeIndexfile(node);
         } else {
             // I1 Invoke ChooseSubtree, with the level as a parameter,
             // to find an appropriate node N, in which to place the
@@ -111,8 +115,9 @@ public class RAsteriskTree {
 
             if (nodeToAdd != null) {
                 node.addEntry(nodeToAdd.getParentEntry());
-                fileManager.writeNodeIndexfile(node);
             }
+            fileManager.createUpdateIndexBlock(node);
+//            fileManager.writeNodeIndexfile(node);
         }
         // I2 If N has M entries, invoke OverflowTreatment with the
         // level of N as a parameter [for reinsertion or split]
@@ -142,19 +147,26 @@ public class RAsteriskTree {
 
                     root = newRoot;
 
-                    fileManager.writeNodeIndexfile(root);
+//                    fileManager.writeNodeIndexfile(root);
                     // reset blockid
+//                    node.setBlockid(0);
+//                    fileManager.writeNodeIndexfile(node);
+//                    fileManager.writeNodeIndexfile(secondNode);
+
+                    fileManager.createUpdateIndexBlock(root);
                     node.setBlockid(0);
-                    fileManager.writeNodeIndexfile(node);
-                    fileManager.writeNodeIndexfile(secondNode);
+                    fileManager.createUpdateIndexBlock(node);
+                    fileManager.createUpdateIndexBlock(secondNode);
                 } else {
                     // adjust bounding box of the existing node
                     BoundingBox newNodeBoundingBox = new BoundingBox();
                     newNodeBoundingBox.createBoundingBoxOfEntries(node.getEntries());
                     node.getParentEntry().setBoundingBox(newNodeBoundingBox);
 
-                    fileManager.writeNodeIndexfile(node);
-                    fileManager.writeNodeIndexfile(secondNode);
+                    fileManager.createUpdateIndexBlock(node);
+                    fileManager.createUpdateIndexBlock(secondNode);
+//                    fileManager.writeNodeIndexfile(node);
+//                    fileManager.writeNodeIndexfile(secondNode);
 
                     // I3 If OverflowTreatment was called and a split was performed, propagate
                     // OverflowTreatment upwards if necessary
@@ -269,7 +281,8 @@ public class RAsteriskTree {
         nodeBoundingBox.createBoundingBoxOfEntries(node.getEntries());
         node.getParentEntry().setBoundingBox(nodeBoundingBox);
 
-        fileManager.writeNodeIndexfile(node);
+        fileManager.createUpdateIndexBlock(node);
+//        fileManager.writeNodeIndexfile(node);
 
         // RI4 In the sort, defined in RI2, starting with the maximum distance
         // (= far reinsert) or minimum distance (= close reinsert), invoke Insert

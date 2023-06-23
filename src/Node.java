@@ -17,8 +17,8 @@ public class Node implements Serializable{
         StringBuilder boundingBoxString = new StringBuilder("(");
         for (int i = 0; i < dimensions; i++) {
             boundingBoxString.append("Dimension ").append(i + 1)
-                    .append(": ").append(boundingBox.getBounds().get(i).getLowerBound())
-                    .append(", ").append(boundingBox.getBounds().get(i).getUpperBound());
+                    .append(", ").append(boundingBox.getBounds().get(i).getUpperBound())
+                    .append(": ").append(boundingBox.getBounds().get(i).getLowerBound());
             if (i < dimensions - 1) {
                 boundingBoxString.append(", ");
             }
