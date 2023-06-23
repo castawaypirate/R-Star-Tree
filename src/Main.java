@@ -16,9 +16,26 @@ public class Main {
 //            ui.init(args[0]);
 //        }
 
+        // skyline query test
         FileManager fileManager = new FileManager(2);
         RAsteriskTree tree = new RAsteriskTree(2, fileManager);
+        tree.branchAndBoundSkyline();
 
+        // range query test
+//        FileManager fileManager = new FileManager(2);
+//        RAsteriskTree tree = new RAsteriskTree(2, fileManager);
+//
+//        ArrayList<Bounds> bounds = new ArrayList<>();
+//        bounds.add(new Bounds(6.0, 5.0));
+//        bounds.add(new Bounds(6.0, 5.0));
+//        BoundingBox box = new BoundingBox(bounds);
+//        tree.search(box, tree.getRoot());
+
+
+        // indexfile, datafile test
+//        FileManager fileManager = new FileManager(2);
+//        RAsteriskTree tree = new RAsteriskTree(2, fileManager);
+//
 //        Record r1 = new Record(1, "1", new ArrayList<Double>(Arrays.asList(1.0, 1.0)));
 //        tree.insertData(r1);
 //
@@ -33,11 +50,11 @@ public class Main {
 //
 //        Record r5 = new Record(5, "5", new ArrayList<Double>(Arrays.asList(5.0, 5.0)));
 //        tree.insertData(r5);
-
-        tree.showTree();
-
-        fileManager.readIndexfileTest();
-        fileManager.readDatafileTest();
+//
+//        tree.showTree();
+//
+//        fileManager.readIndexfileTest();
+//        fileManager.readDatafileTest();
 
 
 //        FileManager f = new FileManager(2);

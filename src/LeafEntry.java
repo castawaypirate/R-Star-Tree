@@ -14,6 +14,7 @@ public class LeafEntry extends Entry {
 
     @Override
     public void showEntry() {
+        System.out.println();
         System.out.println("Record ID:" + recordId);
         super.showEntry();
     }

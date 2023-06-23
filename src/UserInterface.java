@@ -53,8 +53,11 @@ public class UserInterface {
         char choice;
         do {
             System.out.println("type 1 to insert");
+            System.out.println("type 3 for range query");
+            System.out.println("type 5 for skyline query");
             System.out.println("type 0 to exit");
             choice = sc.nextLine().charAt(0);
+            System.out.println();
 //            choice = '1';
             switch (choice) {
                 case '0':
@@ -65,10 +68,22 @@ public class UserInterface {
                     Record record = readRecordFromUser();
                     tree.insertData(record);
                     break;
+                case '3':
+                    // range query
+                    BoundingBox searchBox = readRangeQueryFromUser();
+                    System.out.println("search result:");
+                    tree.search(searchBox, tree.getRoot());
+                    break;
+                case '5':
+                    // skyline query
+                    System.out.println("skyline result:");
+                    tree.branchAndBoundSkyline();
+                    break;
                 default:
                     System.out.println("try again");
                     break;
             }
+            System.out.println();
         } while (choice != '0');
     }
 
@@ -85,7 +100,32 @@ public class UserInterface {
             coordinates.add(value);
         }
         sc.nextLine();
-
+        System.out.println();
         return new Record(id, name, coordinates);
+    }
+
+    public BoundingBox readRangeQueryFromUser(){
+        System.out.println("Upper right point of S");
+        ArrayList<Double> upperRight = new ArrayList<>();
+        for(int i=1;i<=tree.getDimensions();i++){
+            System.out.print("Dimension " + i + ":");
+            double value = sc.nextDouble();
+            upperRight.add(value);
+        }
+        sc.nextLine();
+        System.out.println("Down left point of S");
+        ArrayList<Double> downLeft = new ArrayList<>();
+        for(int i=1;i<=tree.getDimensions();i++){
+            System.out.print("Dimension " + i + ":");
+            double value = sc.nextDouble();
+            downLeft.add(value);
+        }
+        sc.nextLine();
+        System.out.println();
+        ArrayList<Bounds> searchBoxBounds = new ArrayList<>();
+        for(int i=0;i< tree.getDimensions();i++){
+            searchBoxBounds.add(new Bounds(upperRight.get(i), downLeft.get(i)));
+        }
+        return new BoundingBox(searchBoxBounds);
     }
 }

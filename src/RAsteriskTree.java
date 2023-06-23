@@ -414,6 +414,35 @@ public class RAsteriskTree {
         }
         return chooseSplitAxisDistribution.get(index);
     }
+
+    // Algorithm Search
+    public void search(BoundingBox searchBox, Node node){
+        // S1 [Search subtrees] If T(node) is not a leaf,
+        // check each Entry E to determine whether E.I overlaps
+        // S. For all overlapping entries, invoke Search on the
+        // tree whose root node is pointed to by E.p
+        if(node.getLevel() != leafLevel) {
+            for(Entry E : node.getEntries()) {
+                if(E.getBoundingBox().overlap(searchBox)) {
+                    search(searchBox, E.getChildNode());
+                }
+            }
+        }
+        // S2 [Search leaf node] If T is a leaf, check all entries E
+        // to determine whether E.I overlaps S. If so, E is a qualifying
+        // record
+        else {
+            for(Entry E : node.getEntries()) {
+                if(E.getBoundingBox().overlap(searchBox)) {
+                    E.showEntry();
+                }
+            }
+        }
+    }
+
+    public void branchAndBoundSkyline(){
+
+    }
 }
 
 class Pair<T1, T2> {

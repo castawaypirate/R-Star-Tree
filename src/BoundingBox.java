@@ -20,7 +20,6 @@ public class BoundingBox implements Serializable{
         }
     }
 
-
     public ArrayList<Bounds> getBounds() {
         return bounds;
     }
@@ -109,6 +108,20 @@ public class BoundingBox implements Serializable{
             }
         }
         center = computeCenter();
+    }
+
+    public boolean overlap(BoundingBox box) {
+        for (int i = 0; i < bounds.size(); i++) {
+            Bounds currentBounds = bounds.get(i);
+            Bounds boxBounds = box.getBounds().get(i);
+
+            // check if there is no overlap in the current dimension
+            if (currentBounds.getUpperBound() < boxBounds.getLowerBound()
+                    || currentBounds.getLowerBound() > boxBounds.getUpperBound()) {
+                return false; // no overlap in at least one dimension
+            }
+        }
+        return true; // overlap in all dimensions
     }
 
 }
