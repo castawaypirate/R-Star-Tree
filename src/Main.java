@@ -16,17 +16,109 @@ public class Main {
 //            ui.init(args[0]);
 //        }
 
-        // skyline query test
+        // bounding box changes test
+
         FileManager fileManager = new FileManager(2);
         RAsteriskTree tree = new RAsteriskTree(2, fileManager);
+
+//        Record r1 = new Record(1, "1", new ArrayList<Double>(Arrays.asList(1.0, 6.0)));
+//        tree.insertData(r1);
+//
+//        Record r2 = new Record(2, "2", new ArrayList<Double>(Arrays.asList(3.0, 4.0)));
+//        tree.insertData(r2);
+//
+//        Record r3 = new Record(3, "3", new ArrayList<Double>(Arrays.asList(4.0, 3.0)));
+//        tree.insertData(r3);
+//
+//        Record r4 = new Record(4, "4", new ArrayList<Double>(Arrays.asList(3.0, 1.0)));
+//        tree.insertData(r4);
+//
+//        Record r5 = new Record(5, "5", new ArrayList<Double>(Arrays.asList(5.0, 1.0)));
+//        tree.insertData(r5);
+//
+//        Record r6 = new Record(6, "4", new ArrayList<Double>(Arrays.asList(2.0, 2.0)));
+//        tree.insertData(r6);
+//
+//        Record r7 = new Record(7, "5", new ArrayList<Double>(Arrays.asList(1.0, 4.0)));
+//        tree.insertData(r7);
+
+        tree.showTree();
+
+
+
+
+//        ArrayList<Double> coordinates1 = new ArrayList<>();
+//        coordinates1.add(1.0);
+//        coordinates1.add(6.0);
+//        Point point1 = new Point(coordinates1);
+//        BoundingBox box12 = new BoundingBox(point1, point1);
+//        LeafEntry entry = new LeafEntry()
+//
+//        ArrayList<Double> coordinates2 = new ArrayList<>();
+//        coordinates2.add(4.0);
+//        coordinates2.add(2.0);
+//        Point point2 = new Point(coordinates2);
+//
+//        box12.showBoundingBoxPoint();
+
+//        Bounds bounds3 = new Bounds(2.0,1.0);
+//        Bounds bounds4 = new Bounds(2.0,1.0);
+//        ArrayList<Bounds> bounds34 = new ArrayList<>();
+//        bounds34.add(bounds3);
+//        bounds34.add(bounds4);
+//        BoundingBox box34 = new BoundingBox(bounds34);
+//
+//        System.out.println(box12.computeOverlap(box34));
+//
+//        System.out.println(box12.computeOverlapPoint(box34));
+
+//        Bounds bounds1 = new Bounds(20.1,0.0);
+//        Bounds bounds2 = new Bounds(1.0,0.0);
+//        ArrayList<Bounds> arrbounds1 = new ArrayList<>();
+//        arrbounds1.add(bounds1);
+//        arrbounds1.add(bounds2);
+//        BoundingBox box1 = new BoundingBox(arrbounds1);
+//        Entry entry1 = new LeafEntry(1, box1);
+//        box1.showBoundingBoxPoint();
+//        box1.showBoundingBox();
+//        System.out.println(box1.computeMarginPoint());
+//
+//        Bounds bounds3 = new Bounds(21.0,20.0);
+//        Bounds bounds4 = new Bounds(21.0,20.0);
+//        ArrayList<Bounds> arrbounds2 = new ArrayList<>();
+//        arrbounds2.add(bounds3);
+//        arrbounds2.add(bounds4);
+//        BoundingBox box2 = new BoundingBox(arrbounds2);
+//        Entry entry2 = new LeafEntry(2, box2);
+
+//        System.out.println(box2.dominates(box1));
+//        ArrayList<Entry> entries = new ArrayList<>();
+//        entries.add(entry1);
+//        entries.add(entry2);
+//        BoundingBox box = new BoundingBox();
+//        box.createBoundingBoxOfEntriesPoint(entries);
+//        box.showBoundingBoxPoint();
+
+
+//        box12.showBoundingBox();
+//        box12.showBoundingBoxPoint();
+//        System.out.println(box12.computeArea());
+//        System.out.println(box12.computeAreaPoint());
+
+
+
+
+        // skyline query test
+//        FileManager fileManager = new FileManager(2);
+//        RAsteriskTree tree = new RAsteriskTree(2, fileManager);
 
 //        Record r1 = new Record(1, "1", new ArrayList<Double>(Arrays.asList(1.0, 1.0)));
 //        tree.insertData(r1);
 //
-//        Record r2 = new Record(2, "2", new ArrayList<Double>(Arrays.asList(2.0, 2.0)));
+//        Record r2 = new Record(2, "2", new ArrayList<Double>(Arrays.asList(2.0, 1.0)));
 //        tree.insertData(r2);
 //
-//        Record r3 = new Record(3, "3", new ArrayList<Double>(Arrays.asList(3.0, 3.0)));
+//        Record r3 = new Record(3, "3", new ArrayList<Double>(Arrays.asList(1.0, 2.0)));
 //        tree.insertData(r3);
 //
 //        Record r4 = new Record(4, "4", new ArrayList<Double>(Arrays.asList(4.0, 4.0)));
@@ -35,7 +127,29 @@ public class Main {
 //        Record r5 = new Record(5, "5", new ArrayList<Double>(Arrays.asList(5.0, 5.0)));
 //        tree.insertData(r5);
 
-        tree.branchAndBoundSkyline();
+//        LeafEntry entry1 = (LeafEntry) tree.getRoot().getEntries().get(0).getChildNode().getEntries().get(0);
+//        LeafEntry entry2 = (LeafEntry) tree.getRoot().getEntries().get(1).getChildNode().getEntries().get(0);
+//        System.out.println(entry1.getBoundingBox().dominates(entry2.getBoundingBox()));
+//        tree.showTree();
+//        Bounds bounds1 = new Bounds(3.0,2.0);
+//        Bounds bounds2 = new Bounds(2.0,1.0);
+//        ArrayList<Bounds> bounds12 = new ArrayList<>();
+//        bounds12.add(bounds1);
+//        bounds12.add(bounds2);
+//        BoundingBox box12 = new BoundingBox(bounds12);
+//
+//
+//        Bounds bounds3 = new Bounds(2.0,1.0);
+//        Bounds bounds4 = new Bounds(3.0,2.0);
+//        ArrayList<Bounds> bounds34 = new ArrayList<>();
+//        bounds34.add(bounds3);
+//        bounds34.add(bounds4);
+//        BoundingBox box34 = new BoundingBox(bounds34);
+//
+//        System.out.println(box34.dominates(box12));
+
+
+//        tree.branchAndBoundSkyline();
 
         // range query test
 //        FileManager fileManager = new FileManager(2);

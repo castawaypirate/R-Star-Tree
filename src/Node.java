@@ -27,6 +27,27 @@ public class Node implements Serializable{
         return boundingBoxString.toString();
     }
 
+    public String getBoundingBoxInStringPoint(int dimensions) {
+        BoundingBox boundingBox = getNodeBoundingBox();
+        StringBuilder boundingBoxString = new StringBuilder();
+        boundingBoxString.append("Lower Left Point: (");
+        for (int i = 0; i < dimensions; i++) {
+            boundingBoxString.append(boundingBox.getLowerLeft().getCoordinates().get(i));
+            if (i < dimensions - 1) {
+                boundingBoxString.append(", ");
+            }
+        }
+        boundingBoxString.append("), Upper Right Point: (");
+        for (int i = 0; i < dimensions; i++) {
+            boundingBoxString.append(boundingBox.getUpperRight().getCoordinates().get(i));
+            if (i < dimensions - 1) {
+                boundingBoxString.append(", ");
+            }
+        }
+        boundingBoxString.append(")");
+        return boundingBoxString.toString();
+    }
+
     public ArrayList<Entry> getEntries() {
         return entries;
     }
@@ -84,7 +105,7 @@ public class Node implements Serializable{
             // root has no parent entry, so we have to
             // create its bounding box
             BoundingBox rootBoundingBox = new BoundingBox();
-            rootBoundingBox.createBoundingBoxOfEntries(entries);
+            rootBoundingBox.createBoundingBoxOfEntriesPoint(entries);
             return rootBoundingBox;
         }
         // for all other nodes assign and return the bounding

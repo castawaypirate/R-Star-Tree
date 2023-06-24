@@ -48,7 +48,7 @@ public class RAsteriskTree {
     private void showNode(Node node, String indent) {
         if (node != null) {
             System.out.println(indent + "Level: " + node.getLevel());
-            String boundingBoxInfo = indent + "Bounding Box: " + node.getBoundingBoxInString(dimensions);
+            String boundingBoxInfo = indent + "Bounding Box: " + node.getBoundingBoxInStringPoint(dimensions);
             System.out.println(boundingBoxInfo);
             indent += "\t";
             for (Entry entry : node.getEntries()) {
