@@ -12,42 +12,6 @@ public class Node implements Serializable{
         this.level = level;
     }
 
-    public String getBoundingBoxInString(int dimensions) {
-        BoundingBox boundingBox = getNodeBoundingBox();
-        StringBuilder boundingBoxString = new StringBuilder("(");
-        for (int i = 0; i < dimensions; i++) {
-            boundingBoxString.append("Dimension ").append(i + 1)
-                    .append(", ").append(boundingBox.getBounds().get(i).getUpperBound())
-                    .append(": ").append(boundingBox.getBounds().get(i).getLowerBound());
-            if (i < dimensions - 1) {
-                boundingBoxString.append(", ");
-            }
-        }
-        boundingBoxString.append(")");
-        return boundingBoxString.toString();
-    }
-
-    public String getBoundingBoxInStringPoint(int dimensions) {
-        BoundingBox boundingBox = getNodeBoundingBox();
-        StringBuilder boundingBoxString = new StringBuilder();
-        boundingBoxString.append("Lower Left Point: (");
-        for (int i = 0; i < dimensions; i++) {
-            boundingBoxString.append(boundingBox.getLowerLeft().getCoordinates().get(i));
-            if (i < dimensions - 1) {
-                boundingBoxString.append(", ");
-            }
-        }
-        boundingBoxString.append("), Upper Right Point: (");
-        for (int i = 0; i < dimensions; i++) {
-            boundingBoxString.append(boundingBox.getUpperRight().getCoordinates().get(i));
-            if (i < dimensions - 1) {
-                boundingBoxString.append(", ");
-            }
-        }
-        boundingBoxString.append(")");
-        return boundingBoxString.toString();
-    }
-
     public ArrayList<Entry> getEntries() {
         return entries;
     }
@@ -69,6 +33,10 @@ public class Node implements Serializable{
         entries.add(entry);
     }
 
+    public boolean removeEntry(Entry entry) {
+        return entries.remove(entry);
+    }
+
     public int getBlockid(){
         return blockid;
     }
@@ -81,6 +49,27 @@ public class Node implements Serializable{
             System.out.println("Entry in index " + i +":");
             entries.get(i).showEntry();
         }
+    }
+
+    public String getBoundingBoxInStringPoint(int dimensions) {
+        BoundingBox boundingBox = getNodeBoundingBox();
+        StringBuilder boundingBoxString = new StringBuilder();
+        boundingBoxString.append("Lower Left Point: (");
+        for (int i = 0; i < dimensions; i++) {
+            boundingBoxString.append(boundingBox.getLowerLeft().getCoordinates().get(i));
+            if (i < dimensions - 1) {
+                boundingBoxString.append(", ");
+            }
+        }
+        boundingBoxString.append("), Upper Right Point: (");
+        for (int i = 0; i < dimensions; i++) {
+            boundingBoxString.append(boundingBox.getUpperRight().getCoordinates().get(i));
+            if (i < dimensions - 1) {
+                boundingBoxString.append(", ");
+            }
+        }
+        boundingBoxString.append(")");
+        return boundingBoxString.toString();
     }
 
     public boolean hasLeaves() {
@@ -105,7 +94,7 @@ public class Node implements Serializable{
             // root has no parent entry, so we have to
             // create its bounding box
             BoundingBox rootBoundingBox = new BoundingBox();
-            rootBoundingBox.createBoundingBoxOfEntriesPoint(entries);
+            rootBoundingBox.createBoundingBoxOfEntries(entries);
             return rootBoundingBox;
         }
         // for all other nodes assign and return the bounding
@@ -239,13 +228,13 @@ public class Node implements Serializable{
         });
     }
 
-    public ArrayList<Entry> sortEntriesByBound(int dimension, boolean upperBound) {
+    public ArrayList<Entry> sortEntriesByBoundingBoxValue(int dimension, boolean upperRight) {
         HashMap<Entry, Double> mapOfEntriesAndBounds = new HashMap<>();
         for (Entry entry : entries) {
-            if (upperBound) {
-                mapOfEntriesAndBounds.put(entry, entry.getBoundingBox().getBounds().get(dimension).getUpperBound());
+            if (upperRight) {
+                mapOfEntriesAndBounds.put(entry, entry.getBoundingBox().getUpperRight().getCoordinates().get(dimension));
             } else {
-                mapOfEntriesAndBounds.put(entry, entry.getBoundingBox().getBounds().get(dimension).getLowerBound());
+                mapOfEntriesAndBounds.put(entry, entry.getBoundingBox().getLowerLeft().getCoordinates().get(dimension));
             }
         }
 
@@ -261,5 +250,22 @@ public class Node implements Serializable{
             sortedEntries.add(entry.getKey());
         }
         return sortedEntries;
+    }
+
+    public ArrayList<Integer> pathToRoot() {
+        ArrayList<Integer> path = new ArrayList<>();
+        Node currentNode = this;
+        while (currentNode != null) {
+            path.add(currentNode.getBlockid());
+            Entry parentEntry = currentNode.getParentEntry();
+            if (parentEntry != null) {
+                Node parentNode = parentEntry.getParentNode();
+                currentNode = parentNode;
+            } else {
+                currentNode = null;  // reached the root, exit the loop
+            }
+        }
+        Collections.reverse(path);  // reverse the path to start from root to leaf
+        return path;
     }
 }

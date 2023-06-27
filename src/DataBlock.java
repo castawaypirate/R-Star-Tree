@@ -37,7 +37,7 @@ public class DataBlock extends Block{
         return records.size();
     }
 
-    public Record searchRecordInTheBlock(int recordId){
+    public Record searchRecordInTheBlock(long recordId){
         Record record = null;
         for(int i=0;i<records.size();i++) {
             if (records.get(i).getId()==recordId) {

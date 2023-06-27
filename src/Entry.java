@@ -48,15 +48,8 @@ public class Entry implements Serializable{
     }
 
     public BoundingBox assumingBoundingBox(Entry incomingEntry) {
-        ArrayList<Bounds> boundsInEachDimension = new ArrayList<>();
-        for (int i = 0; i < boundingBox.getBounds().size(); i++) {
-            Bounds bounds = new Bounds();
-            Bounds existingBounds = boundingBox.getBounds().get(i);
-            Bounds incomingBounds = incomingEntry.getBoundingBox().getBounds().get(i);
-            bounds.setLowerBound(Math.min(existingBounds.getLowerBound(), incomingBounds.getLowerBound()));
-            bounds.setUpperBound(Math.max(existingBounds.getUpperBound(), incomingBounds.getUpperBound()));
-            boundsInEachDimension.add(bounds);
-        }
-        return new BoundingBox(boundsInEachDimension);
+        Point lowerLeft = incomingEntry.getBoundingBox().getLowerLeft().createLowerPoint(this.boundingBox.getLowerLeft());
+        Point upperRight = incomingEntry.getBoundingBox().getUpperRight().createUpperPoint(this.boundingBox.getUpperRight());
+        return new BoundingBox(lowerLeft, upperRight);
     }
 }

@@ -1,5 +1,5 @@
 public class LeafEntry extends Entry {
-    public long recordId;
+    private long recordId;
 
     public LeafEntry(long recordId, BoundingBox boundingBox) {
         super();
@@ -21,5 +21,13 @@ public class LeafEntry extends Entry {
 
     public long getLeafEntryId() {
         return recordId;
+    }
+
+    public void setRecordId(long recordId) {
+        this.recordId = recordId;
+    }
+
+    public boolean matches(LeafEntry incomingEntry){
+        return super.getBoundingBox().identical(incomingEntry.getBoundingBox());
     }
 }

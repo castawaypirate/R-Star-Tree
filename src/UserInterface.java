@@ -64,9 +64,16 @@ public class UserInterface {
                     System.out.println("that's all folks!");
                     break;
                 case '1':
-                    // insert data
+                    // insert record
                     Record record = readRecordFromUser();
                     tree.insertData(record);
+                    break;
+                case '2':
+                    // delete record
+                    LeafEntry leafEntry = readRecordCoordinatesFromUser();
+                    if(tree.delete(leafEntry)) {
+                        System.out.println("Record was deleted successfully");
+                    }
                     break;
                 case '3':
                     // range query
@@ -104,7 +111,38 @@ public class UserInterface {
         return new Record(id, name, coordinates);
     }
 
+    public LeafEntry readRecordCoordinatesFromUser(){
+        System.out.println("Type the ID you want to delete");
+        ArrayList<Double> coordinates = new ArrayList<>();
+        for(int i=1;i<=tree.getDimensions();i++){
+            System.out.print("Dimension " + i + ":");
+            double value = sc.nextDouble();
+            coordinates.add(value);
+        }
+        sc.nextLine();
+        return new LeafEntry(0, new BoundingBox(new Point(coordinates), new Point(coordinates)));
+    }
+
+    // implementation under construction
+    public long readRecordIDFromUser(){
+        System.out.println("Give the coordinates of the Record you want to delete");
+
+        System.out.print("ID:");
+        long id = sc.nextLong();
+        sc.nextLine();
+        return id;
+    }
+
     public BoundingBox readRangeQueryFromUser(){
+        System.out.println("Lower left point of S");
+        ArrayList<Double> lowerLeft = new ArrayList<>();
+        for(int i=1;i<=tree.getDimensions();i++){
+            System.out.print("Dimension " + i + ":");
+            double value = sc.nextDouble();
+            lowerLeft.add(value);
+        }
+        sc.nextLine();
+
         System.out.println("Upper right point of S");
         ArrayList<Double> upperRight = new ArrayList<>();
         for(int i=1;i<=tree.getDimensions();i++){
@@ -113,19 +151,7 @@ public class UserInterface {
             upperRight.add(value);
         }
         sc.nextLine();
-        System.out.println("Down left point of S");
-        ArrayList<Double> downLeft = new ArrayList<>();
-        for(int i=1;i<=tree.getDimensions();i++){
-            System.out.print("Dimension " + i + ":");
-            double value = sc.nextDouble();
-            downLeft.add(value);
-        }
-        sc.nextLine();
         System.out.println();
-        ArrayList<Bounds> searchBoxBounds = new ArrayList<>();
-        for(int i=0;i< tree.getDimensions();i++){
-            searchBoxBounds.add(new Bounds(upperRight.get(i), downLeft.get(i)));
-        }
-        return new BoundingBox(searchBoxBounds);
+        return new BoundingBox(new Point(lowerLeft), new Point(upperRight));
     }
 }

@@ -47,6 +47,18 @@ public class FileManager {
         return maxNumberOfEntriesInBlock;
     }
 
+    public Record getRecordFromDatafile(long id){
+        Record record = null;
+        readDatafile();
+        for(DataBlock block: datafileBlocks) {
+            record = block.searchRecordInTheBlock(id);
+            if(record!=null) {
+                break;
+            }
+        }
+        return record;
+    }
+
     public boolean datafileExists(){
         File f = new File(pathToDatafile);
         if(f.exists() && !f.isDirectory()) {
@@ -149,6 +161,8 @@ public class FileManager {
             }
         }
         if(blockToAdd == null){
+            // think about IndexBlock id because every id corresponds to the index of the arraylist indexfileBlocks
+            // and when deletion occurs some those indexes will change
             blockToAdd = new IndexBlock(indexfileBlocks.size(), "block"+indexfileBlocks.size());
             indexfileBlocks.add(blockToAdd);
         }
@@ -303,12 +317,11 @@ public class FileManager {
     public int computeMaximumNumberOfEntriesInABlock(){
         IndexBlock testBlock = new IndexBlock(0,"testBlock");
         Node testNode = new Node(0);
-        ArrayList<Bounds> testBounds = new ArrayList<>();
+        ArrayList<Double> coordinates = new ArrayList<>();
         for(int i=0;i<dimensions;i++) {
-            Bounds bounds = new Bounds(Double.MAX_VALUE, Double.MAX_VALUE);
-            testBounds.add(bounds);
+            coordinates.add(Double.MAX_VALUE);
         }
-        LeafEntry testEntry = new LeafEntry(0, new BoundingBox(testBounds));
+        LeafEntry testEntry = new LeafEntry(0, new BoundingBox(new Point(coordinates), new Point(coordinates)));
         int maxEntries = 0;
         for(int i=0;i<Integer.MAX_VALUE;i++){
             testNode.addEntry(testEntry);

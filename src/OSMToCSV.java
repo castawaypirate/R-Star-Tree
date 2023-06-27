@@ -3,12 +3,10 @@
 import info.pavie.basicosmparser.controller.*;
 import java.io.File;
 
-import info.pavie.basicosmparser.controller.*;
 import info.pavie.basicosmparser.model.*;
 import info.pavie.basicosmparser.model.Node;
 import org.xml.sax.SAXException;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;

@@ -57,7 +57,8 @@ public class RAsteriskTree {
                     System.out.println(indent + "Leaf Entry: Record ID: " + leafEntry.getLeafEntryId());
                 } else {
                     Node childNode = entry.getChildNode();
-                    System.out.println(indent + "Index Node:");
+                    System.out.println(indent + "Index Node: ");
+                    System.out.println(indent + "IndexBlock ID: " + childNode.getBlockid());
                     showNode(childNode, indent);
                 }
             }
@@ -76,16 +77,11 @@ public class RAsteriskTree {
     // Takes a record as a parameter, makes a leaf entry out of it
     // and inserts in to the tree
     public void insertData(Record record) {
-        ArrayList<Bounds> boundsInEachDimension = new ArrayList<>();
-        for(int i=0;i<dimensions;i++) {
-            Bounds bounds = new Bounds(record.getCoordinates().get(i), record.getCoordinates().get(i));
-            boundsInEachDimension.add(bounds);
-        }
         // ID1 Invoke Insert starting with the leaf level as a
         // parameter, to insert a new data rectangle
         // CS1 Set N to be the root (as we pass the root as the node to add)
         fileManager.readIndexfile();
-        insert(new LeafEntry(record.getId(), new BoundingBox(boundsInEachDimension)), root, leafLevel);
+        insert(new LeafEntry(record.getId(), new BoundingBox(new Point(record.getCoordinates()), new Point(record.getCoordinates()))), root, leafLevel);
         fileManager.writeToIndexfile();
         fileManager.writeRecordToDatafile(record);
     }
@@ -306,9 +302,9 @@ public class RAsteriskTree {
 //        int splitAxis = 0;
         ArrayList<Pair<ArrayList<Entry>, ArrayList<Entry>>> chooseSplitAxisListOfPairs = new ArrayList<>();
         for (int dim = 0; dim < dimensions; dim++) {
-            // sort entries by lower, then by upper bound and put them in two ArrayLists
-            ArrayList<Entry> sortedByLowerBound = node.sortEntriesByBound(dim, false);
-            ArrayList<Entry> sortedByUpperBound = node.sortEntriesByBound(dim, true);
+            // sort entries by lower, then by upper value and put them in two ArrayLists
+            ArrayList<Entry> sortedByLowerBound = node.sortEntriesByBoundingBoxValue(dim, false);
+            ArrayList<Entry> sortedByUpperBound = node.sortEntriesByBoundingBoxValue(dim, true);
 
             // put the returned ArrayLists in a List
             List<ArrayList<Entry>> listOfSortedEntriesInAxis = new ArrayList<>();
@@ -415,6 +411,54 @@ public class RAsteriskTree {
         return chooseSplitAxisDistribution.get(index);
     }
 
+    // Algorithm Delete
+    public boolean delete(LeafEntry leafEntry){
+        ArrayList<LeafEntry> listOfLeafEntries = findLeaf(leafEntry, root, new ArrayList<>());
+        if(listOfLeafEntries.isEmpty()) {
+            System.out.println("There was no record with these coordinates");
+            return false;
+        }
+        LeafEntry leafEntryToRemove = listOfLeafEntries.get(0);
+        long id = leafEntryToRemove.getLeafEntryId();
+        ArrayList<Integer> pathOfIndexBlockids = leafEntryToRemove.getParentNode().pathToRoot();
+        if(listOfLeafEntries.get(0).getParentNode().removeEntry(listOfLeafEntries.get(0))) {
+            // the first record found with the give coordinate is the one to be removed
+            System.out.println(pathOfIndexBlockids);
+
+        }
+        System.out.println("The records was not removed successfully");
+        return false;
+    }
+
+    // Algorithm FindLeaf
+    public ArrayList<LeafEntry> findLeaf(LeafEntry leafEntry, Node node, ArrayList<LeafEntry> leafEntries) {
+        // [Search subtrees] If T(node) is not a leaf check each entry F in T
+        // if F.I overlaps E.I (leafEntry.BoundingBox). For each such entry
+        // invoke FindLeaf on the tree whose root is pointed to by F.p until
+        // E is found or all entries have been checked.
+        if(node.getLevel() != leafLevel) {
+            for(Entry E : node.getEntries()) {
+                if(E.getBoundingBox().overlap(leafEntry.getBoundingBox())) {
+                    leafEntries = findLeaf(leafEntry, E.getChildNode(), leafEntries);
+                }
+            }
+        }
+        // [Search leaf node for record] If T is a leaf, check each entry to
+        // see if it matches E. If E is found return T.
+        else {
+            for(Entry E : node.getEntries()) {
+                if(E.getBoundingBox().identical(leafEntry.getBoundingBox())) {
+                    leafEntries.add((LeafEntry) E);
+                }
+            }
+        }
+        return leafEntries;
+    }
+
+    public boolean deleteWithID(long id){
+        return true;
+    }
+
     // Algorithm Search
     public void search(BoundingBox searchBox, Node node){
         // S1 [Search subtrees] If T(node) is not a leaf,
@@ -445,11 +489,12 @@ public class RAsteriskTree {
         ArrayList<LeafEntry> skyline = new ArrayList<>();
         MinHeap<Entry> minHeap = new MinHeap<>();
         // initialize origin
-        ArrayList<Double> origin = new ArrayList<>();
+        ArrayList<Double> originCoordinates = new ArrayList<>();
         for(int i=0;i<dimensions;i++) {
-            origin.add(0.0);
+            originCoordinates.add(0.0);
         }
-        // insert all entries of roo in the heap
+        Point origin = new Point(originCoordinates);
+        // insert all entries of root in the heap
         for(Entry entry : root.getEntries()) {
             minHeap.addObject(entry, entry.getBoundingBox().computeManhattanDistanceFromPoint(origin));
         }
@@ -475,6 +520,17 @@ public class RAsteriskTree {
                 }
             }
         }
+
+        // sort skyline ArrayList according to dim dimension
+        int dim = 1;
+        Collections.sort(skyline, new Comparator<LeafEntry>() {
+            @Override
+            public int compare(LeafEntry entry1, LeafEntry entry2) {
+                double x1 = entry1.getBoundingBox().getLowerLeft().getCoordinates().get(dim-1); // Assuming x coordinate is at index 0
+                double x2 = entry2.getBoundingBox().getLowerLeft().getCoordinates().get(dim-1); // Assuming x coordinate is at index 0
+                return Double.compare(x1, x2);
+            }
+        });
 
         for(LeafEntry entry : skyline) {
             entry.showEntry();

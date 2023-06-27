@@ -16,10 +16,60 @@ public class Main {
 //            ui.init(args[0]);
 //        }
 
-        // bounding box changes test
 
+        // delete test
         FileManager fileManager = new FileManager(2);
         RAsteriskTree tree = new RAsteriskTree(2, fileManager);
+
+//        Record r1 = new Record(1, "1", new ArrayList<Double>(Arrays.asList(1.0, 1.0)));
+//        tree.insertData(r1);
+//
+//        Record r2 = new Record(2, "2", new ArrayList<Double>(Arrays.asList(2.0, 2.0)));
+//        tree.insertData(r2);
+//
+//        Record r3 = new Record(3, "3", new ArrayList<Double>(Arrays.asList(3.0, 3.0)));
+//        tree.insertData(r3);
+//
+//        Record r4 = new Record(4, "4", new ArrayList<Double>(Arrays.asList(4.0, 4.0)));
+//        tree.insertData(r4);
+//
+//        Record r5 = new Record(5, "5", new ArrayList<Double>(Arrays.asList(5.0, 5.0)));
+//        tree.insertData(r5);
+//
+//        tree.showTree();
+
+        ArrayList<Double> coordinates1 = new ArrayList<>();
+        coordinates1.add(1.0);
+        coordinates1.add(1.0);
+        Point point1 = new Point(coordinates1);
+        LeafEntry entry1 = new LeafEntry(0, new BoundingBox(point1, point1));
+
+        System.out.println(tree.delete(entry1));
+
+//        tree.showTree();
+
+//        ArrayList<Double> coordinates1 = new ArrayList<>();
+//        coordinates1.add(1.0);
+//        coordinates1.add(6.0);
+//        Point point1 = new Point(coordinates1);
+//        LeafEntry entry1 = new LeafEntry(0, new BoundingBox(point1, point1));
+//
+//        ArrayList<Double> coordinates2 = new ArrayList<>();
+//        coordinates2.add(1.0);
+//        coordinates2.add(6.0);
+//        Point point2 = new Point(coordinates2);
+//        LeafEntry entry2 = new LeafEntry(0, new BoundingBox(point2, point2));
+//
+//        System.out.println(entry1.getBoundingBox().identical(entry2.getBoundingBox()));
+
+
+
+
+        // bounding box changes test
+
+//        FileManager fileManager = new FileManager(2);
+//        RAsteriskTree tree = new RAsteriskTree(2, fileManager);
+
 
 //        Record r1 = new Record(1, "1", new ArrayList<Double>(Arrays.asList(1.0, 6.0)));
 //        tree.insertData(r1);
@@ -41,11 +91,30 @@ public class Main {
 //
 //        Record r7 = new Record(7, "5", new ArrayList<Double>(Arrays.asList(1.0, 4.0)));
 //        tree.insertData(r7);
+//
+//        tree.showTree();
 
-        tree.showTree();
+//        tree.branchAndBoundSkyline();
 
-
-
+//        FileManager fileManager = new FileManager(2);
+//        RAsteriskTree tree = new RAsteriskTree(2, fileManager);
+//
+//        Record r1 = new Record(1, "1", new ArrayList<Double>(Arrays.asList(1.0, 1.0)));
+//        tree.insertData(r1);
+//
+//        Record r2 = new Record(2, "2", new ArrayList<Double>(Arrays.asList(2.0, 2.0)));
+//        tree.insertData(r2);
+//
+//        Record r3 = new Record(3, "3", new ArrayList<Double>(Arrays.asList(3.0, 3.0)));
+//        tree.insertData(r3);
+//
+//        Record r4 = new Record(4, "4", new ArrayList<Double>(Arrays.asList(4.0, 4.0)));
+//        tree.insertData(r4);
+//
+//        Record r5 = new Record(5, "5", new ArrayList<Double>(Arrays.asList(5.0, 5.0)));
+//        tree.insertData(r5);
+//
+//        tree.showTree();
 
 //        ArrayList<Double> coordinates1 = new ArrayList<>();
 //        coordinates1.add(1.0);

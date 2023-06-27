@@ -9,6 +9,7 @@ public class Point implements Serializable{
         pointDimensions = coordinates.size();
     }
     public Point(){
+        coordinates = new ArrayList<>();
     }
 
     public ArrayList<Double> getCoordinates() {
@@ -65,4 +66,38 @@ public class Point implements Serializable{
         System.out.print(")");
         System.out.println();
     }
+
+    public Point createLowerPoint(Point incomingPoint) {
+        ArrayList<Double> incomingCoordinates = incomingPoint.getCoordinates();
+        if (pointDimensions != incomingCoordinates.size()) {
+            throw new IllegalArgumentException("points must have the same number of dimensions");
+        }
+
+        ArrayList<Double> lowerCoordinates = new ArrayList<>(pointDimensions);
+        for (int i = 0; i < pointDimensions; i++) {
+            double currentCoordinate = coordinates.get(i);
+            double incomingCoordinate = incomingCoordinates.get(i);
+            double lowerCoordinate = Math.min(currentCoordinate, incomingCoordinate);
+            lowerCoordinates.add(lowerCoordinate);
+        }
+        return new Point(lowerCoordinates);
+    }
+
+    public Point createUpperPoint(Point incomingPoint) {
+        ArrayList<Double> incomingCoordinates = incomingPoint.getCoordinates();
+        if (pointDimensions != incomingCoordinates.size()) {
+            throw new IllegalArgumentException("points must have the same number of dimensions");
+        }
+
+        ArrayList<Double> upperCoordinates = new ArrayList<>(pointDimensions);
+        for (int i = 0; i < pointDimensions; i++) {
+            double currentCoordinate = coordinates.get(i);
+            double incomingCoordinate = incomingCoordinates.get(i);
+            double upperCoordinate = Math.max(currentCoordinate, incomingCoordinate);
+            upperCoordinates.add(upperCoordinate);
+        }
+
+        return new Point(upperCoordinates);
+    }
+
 }
