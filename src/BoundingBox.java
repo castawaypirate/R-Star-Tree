@@ -21,10 +21,11 @@ public class BoundingBox implements Serializable{
 
     public void showBoundingBox() {
         System.out.println("Bounding Box:");
-        System.out.println("Upper Right Point:");
-        upperRight.showPoint();
         System.out.println("Down Left Point:");
         lowerLeft.showPoint();
+        System.out.println("Upper Right Point:");
+        upperRight.showPoint();
+
     }
 
     public Point getUpperRight() {

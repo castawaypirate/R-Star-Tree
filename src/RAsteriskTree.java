@@ -12,9 +12,6 @@ public class RAsteriskTree {
     // minimum entries per node
     private int m;
     private final static int leafLevel = 1;
-    // defines how many entries of a node should be used during ChooseSubtree
-    private final static int chooseSubtree_p = 32;
-
     private int reinsert_p;
     public RAsteriskTree(int dimensions, FileManager fileManager){
         this.dimensions = dimensions;
@@ -27,6 +24,7 @@ public class RAsteriskTree {
         M = fileManager.getMaxNumberOfEntriesInBlock();
         // 40% of M best performance
         m = Math.max((int) Math.floor(0.4 * M), 1);
+        m=2;
         // 30% of M best performance
         reinsert_p = Math.max((int) Math.floor(0.3 * M), 1);
     }
@@ -172,28 +170,6 @@ public class RAsteriskTree {
         // we need to see of the childpointers of node point to leaves
         // that's why we are checking it by increasing the leaf level by 1
         if (node.getLevel() == level + 1) {
-
-
-//            if (M > (chooseSubtree_p*2)/3  && node.getEntries().size() > chooseSubtree_p) {
-//                // ** alternative algorithm:
-//                // Sort the rectangles in N in increasing order of
-//                // then area enlargement needed to include the new
-//                // data rectangle
-//
-//                // Let A be the group of the first p entries
-//
-//                // From the items in A, considering all items in
-//                // N, choose the leaf/entry whose rectangle needs the
-//                // least overlap enlargement
-//
-//                // Choose the entry in N whose bounding box needs the least overlap enlargement
-//                // to include the new data
-//                Entry N = node.getEntryWithTheLeastOverlapEnlargement(entry);
-//
-//                return N.getChildNode();
-//            }
-
-
             // CS2 choose the entry in N whose rectangle needs the least
             // overlap enlargement to include the new data
             // rectangle.
@@ -413,26 +389,84 @@ public class RAsteriskTree {
 
     // Algorithm Delete
     public boolean delete(LeafEntry leafEntry){
+        fileManager.readIndexfile();
+        // D1 [Find node containing record] Invoke FindLeaf to locate
+        // the leaf of L containing E(leafEntry). Stop if the record
+        // was not found.
         ArrayList<LeafEntry> listOfLeafEntries = findLeaf(leafEntry, root, new ArrayList<>());
         if(listOfLeafEntries.isEmpty()) {
             System.out.println("There was no record with these coordinates");
             return false;
         }
+        // the first record found with the given coordinate is the one to be removed
         LeafEntry leafEntryToRemove = listOfLeafEntries.get(0);
         long id = leafEntryToRemove.getLeafEntryId();
-        ArrayList<Integer> pathOfIndexBlockids = leafEntryToRemove.getParentNode().pathToRoot();
-        if(listOfLeafEntries.get(0).getParentNode().removeEntry(listOfLeafEntries.get(0))) {
-            // the first record found with the give coordinate is the one to be removed
-            System.out.println(pathOfIndexBlockids);
-
+        Node node = listOfLeafEntries.get(0).getParentNode();
+        // D2 [Delete record] Remove E(leafEntry) From L(node)
+        if(node.removeEntry(leafEntryToRemove)){
+            fileManager.createUpdateIndexBlock(node);
+            // D3 [Propagate changes] Invoke CondenseTree, passing L(node).
+            condenseTree(node);
+            // D4 [Shorten tree] If the root node has only one child after the tree has
+            // been adjusted, make the child the new root.
+            if(root.getEntries().size()==1){
+                rootLevel--;
+                int childBlockid = root.getEntries().get(0).getChildNode().getBlockid();
+                Node newRoot = root.getEntries().get(0).getChildNode();
+                newRoot.setBlockid(root.getBlockid());
+                newRoot.setParentEntry(null);
+                root = newRoot;
+                fileManager.deleteIndexBlockWithBlockid(childBlockid);
+                fileManager.createUpdateIndexBlock(root);
+            }
+            fileManager.writeToIndexfile();
+            fileManager.deleteRecordFromDatafile(id);
+            return true;
         }
         System.out.println("The records was not removed successfully");
         return false;
     }
 
+    // Algorithm CondenseTree
+    public void condenseTree(Node node){
+        // CT1 [Initialize] Set N=L. Set Q, the set of eliminated
+        // nodes, to be empty.
+       ArrayList<Node> qNodes = new ArrayList<>();
+        // CT2 [Find parent entry] If N is the root, go to CT6. Otherwise,
+        // let P be the parent of N, and let EN be N's entry in P.
+        while(node.getLevel() != rootLevel){
+            Node pNode = node.getParentEntry().getParentNode();
+            // CT3 [Eliminate under-full node] If N has fewer than m entries,
+            // delete EN from P and add N to set Q.
+            if(node.getEntries().size() < m){
+                pNode.removeEntry(node.getParentEntry());
+                fileManager.deleteIndexBlockWithBlockid(node.getBlockid());
+                fileManager.createUpdateIndexBlock(pNode);
+                qNodes.add(node);
+            } else {
+                // CT4 [Adjust covering rectangle] If N has not been eliminated,
+                // adjust ENI to tightly contain all entries in N.
+                node.adjustBoundingBoxToFitEntry(null);
+                fileManager.createUpdateIndexBlock(node);
+            }
+            // CT5 [Move up one level in tree] Set N=P and repeat from CT2.
+            node = pNode;
+        }
+        // CT6 [Re-insert orphaned entries] Re-insert all entries of nodes in set Q.
+        // Entries from eliminated leaf nodes are re-inserted in tree leaves as
+        // described in Algorithm Insert, but entries from higher-level nodes must
+        // be placed higher in the tree, so that leaves of their dependent subtrees
+        // will be on the same level as leaves of the main tree.
+        for(int i=qNodes.size()-1;i>=0;i--){
+            for(Entry e : qNodes.get(i).getEntries()){
+                insert(e, root, qNodes.get(i).getLevel());
+            }
+        }
+    }
+
     // Algorithm FindLeaf
     public ArrayList<LeafEntry> findLeaf(LeafEntry leafEntry, Node node, ArrayList<LeafEntry> leafEntries) {
-        // [Search subtrees] If T(node) is not a leaf check each entry F in T
+        // FL1 [Search subtrees] If T(node) is not a leaf check each entry F in T
         // if F.I overlaps E.I (leafEntry.BoundingBox). For each such entry
         // invoke FindLeaf on the tree whose root is pointed to by F.p until
         // E is found or all entries have been checked.
@@ -443,7 +477,7 @@ public class RAsteriskTree {
                 }
             }
         }
-        // [Search leaf node for record] If T is a leaf, check each entry to
+        // FL2 [Search leaf node for record] If T is a leaf, check each entry to
         // see if it matches E. If E is found return T.
         else {
             for(Entry E : node.getEntries()) {
@@ -456,7 +490,7 @@ public class RAsteriskTree {
     }
 
     public boolean deleteWithID(long id){
-        return true;
+        return false;
     }
 
     // Algorithm Search
@@ -520,7 +554,6 @@ public class RAsteriskTree {
                 }
             }
         }
-
         // sort skyline ArrayList according to dim dimension
         int dim = 1;
         Collections.sort(skyline, new Comparator<LeafEntry>() {
@@ -535,6 +568,10 @@ public class RAsteriskTree {
         for(LeafEntry entry : skyline) {
             entry.showEntry();
         }
+    }
+
+    public void knnQuery(Point point, int k){
+
     }
 }
 

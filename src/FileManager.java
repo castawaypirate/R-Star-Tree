@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class FileManager {
@@ -11,15 +12,15 @@ public class FileManager {
     private ArrayList<DataBlock> datafileBlocks;
     private ArrayList<IndexBlock> indexfileBlocks;
     private int dimensions;
-    private final static int rootBlockid = 1;
+    private final static int rootIndexBlockid = 1;
     public FileManager(int dimensions){
         this.dimensions=dimensions;
         this.datafileBlocks=new ArrayList<>();
         this.indexfileBlocks=new ArrayList<>();
 //        maxNumberOfRecordsInBlock = computeMaximumNumberOfRecordsInABlock();
 //        maxNumberOfEntriesInBlock = computeMaximumNumberOfEntriesInABlock();
-        maxNumberOfRecordsInBlock = 3;
-        maxNumberOfEntriesInBlock = 3;
+        maxNumberOfRecordsInBlock = 4;
+        maxNumberOfEntriesInBlock = 4;
     }
 
     public Node getRoot() {
@@ -29,16 +30,17 @@ public class FileManager {
         }
         readIndexfile();
         for(int i=1;i<indexfileBlocks.size();i++) {
-            if(indexfileBlocks.get(i).getNodeOfBlock().getBlockid()==rootBlockid) {
+            if(indexfileBlocks.get(i).getNodeOfBlock().getBlockid()==rootIndexBlockid) {
                 return indexfileBlocks.get(i).getNodeOfBlock();
             }
         }
         // create root at leaf level
         Node root = new Node(1);
         // create block for root
-        IndexBlock rootBlock = new IndexBlock(rootBlockid, "block" + rootBlockid);
+        IndexBlock rootBlock = new IndexBlock(rootIndexBlockid, "block" + rootIndexBlockid);
         rootBlock.setNodeOfBlock(root);
         indexfileBlocks.add(rootBlock);
+
         writeObjectToIndexfile(indexfileBlocks);
         return root;
     }
@@ -78,6 +80,11 @@ public class FileManager {
     public void createDatafile() {
         DataBlock block0 = new DataBlock(0, "block0");
         DataBlock block1 = new DataBlock(1, "block1");
+
+        // add blockids to the ArrayList in block0 which stores the blockids
+        block0.getBlockids().add(0);
+        block0.getBlockids().add(1);
+
         datafileBlocks.add(block0);
         datafileBlocks.add(block1);
         writeObjectToDatafile(datafileBlocks);
@@ -85,6 +92,10 @@ public class FileManager {
 
     public void createIndexfile() {
         IndexBlock block0 = new IndexBlock(0, "block0");
+
+        // add blockids to the ArrayList in block0 which stores the blockids
+        block0.getBlockids().add(0);
+
         indexfileBlocks.add(block0);
         writeObjectToIndexfile(indexfileBlocks);
     }
@@ -152,6 +163,15 @@ public class FileManager {
         }
     }
 
+    public int getUniqueId(ArrayList<Integer> ids){
+        HashSet<Integer> idSet = new HashSet<Integer>(ids);
+        int uniqueId = 2;
+        while (idSet.contains(uniqueId)) {
+            uniqueId++;
+        }
+        return uniqueId;
+    }
+
     public void createUpdateIndexBlock(Node node){
         IndexBlock blockToAdd = null;
         for(IndexBlock indexBlock : indexfileBlocks){
@@ -161,32 +181,16 @@ public class FileManager {
             }
         }
         if(blockToAdd == null){
-            // think about IndexBlock id because every id corresponds to the index of the arraylist indexfileBlocks
-            // and when deletion occurs some those indexes will change
-            blockToAdd = new IndexBlock(indexfileBlocks.size(), "block"+indexfileBlocks.size());
+            int indexBlockId = getUniqueId(indexfileBlocks.get(0).getBlockids());
+            blockToAdd = new IndexBlock(indexBlockId, "block"+indexBlockId);
             indexfileBlocks.add(blockToAdd);
+            // add indexBlockId to blockids of block0
+            indexfileBlocks.get(0).getBlockids().add(indexBlockId);
         }
         blockToAdd.setNodeOfBlock(node);
     }
 
     public void writeToIndexfile(){
-        writeObjectToIndexfile(indexfileBlocks);
-    }
-
-    public void writeNodeIndexfile(Node node) {
-        readIndexfile();
-        IndexBlock blockToAdd = null;
-        for(IndexBlock indexBlock : indexfileBlocks){
-            if(indexBlock.getBlockid()==node.getBlockid() && indexBlock.getBlockid()!=0){
-                blockToAdd = indexBlock;
-                break;
-            }
-        }
-        if(blockToAdd == null){
-            blockToAdd = new IndexBlock(indexfileBlocks.size(), "block"+indexfileBlocks.size());
-            indexfileBlocks.add(blockToAdd);
-        }
-        blockToAdd.setNodeOfBlock(node);
         writeObjectToIndexfile(indexfileBlocks);
     }
 
@@ -204,44 +208,14 @@ public class FileManager {
             }
         }
         if(blockToAdd == null){
-            blockToAdd = new DataBlock(datafileBlocks.size(), "block"+datafileBlocks.size());
+            int dataBlockId = getUniqueId(datafileBlocks.get(0).getBlockids());
+            blockToAdd = new DataBlock(dataBlockId, "block"+dataBlockId);
             datafileBlocks.add(blockToAdd);
+            // add dataBlockId to blockids of block0
+            datafileBlocks.get(0).getBlockids().add(dataBlockId);
         }
         blockToAdd.addRecordToBlock(record);
         writeObjectToDatafile(datafileBlocks);
-    }
-
-    public void writeToDatafile(ArrayList<Record> records){
-        if(datafileExists()) {
-            System.out.println("datafile.dat already exists");
-
-        }else {
-            DataBlock block0 = new DataBlock(0, "block0");
-            // set the number of records inside the datafile
-//            block0.setNumberOfRecordsInsideDatafile(block0.getNumberOfRecordsInsideDatafile()+records.size());
-//            System.out.println("block0 bytes:" + getBytesOfObject(block0));
-            datafileBlocks.add(block0);
-//            System.out.println("datafileBlocks bytes:" + getBytesOfObject(datafileBlocks));
-//            System.out.println(maxRecordsPerBlock);
-            int blockId = 1;
-            for(int i=0;i<records.size();i++) {
-                DataBlock block = new DataBlock(blockId, "block"+blockId);
-                for(int j=0;j<maxNumberOfRecordsInBlock;j++) {
-                    records.get(i).setBlockId(blockId);
-//                    System.out.println(getBytesOfObject(records.get(i)));
-                    block.addRecordToBlock(records.get(i));
-                }
-//                System.out.println(block.getRecords().size());
-//                System.out.println("block"+blockId+" bytes:" + getBytesOfObject(block));
-                datafileBlocks.add(block);
-                blockId++;
-            }
-//            System.out.println(getBytesOfObject(datafileBlocks.get(1)));
-//            System.out.println(getBytesOfObject(datafileBlocks.get(2)));
-//            System.out.println("datafileBlocks bytes:" + getBytesOfObject(datafileBlocks));
-//            System.out.println(getBytesOfObject(records.get(5)));
-            writeObjectToDatafile(datafileBlocks);
-        }
     }
 
     public void writeObjectToDatafile(Object object) {
@@ -264,6 +238,35 @@ public class FileManager {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    public void deleteRecordFromDatafile(long recordId){
+        readDatafile();
+        int blockIndex = 0;
+        Record recordToDelete = null;
+        for(int i=1;i<datafileBlocks.size();i++){
+            for(Record record : datafileBlocks.get(i).getRecords()){
+                if(record.getId()==recordId){
+                    blockIndex=i;
+                    recordToDelete = record;
+                    break;
+                }
+            }
+        }
+        datafileBlocks.get(blockIndex).getRecords().remove(recordToDelete);
+        writeObjectToDatafile(datafileBlocks);
+    }
+
+    public void deleteIndexBlockWithBlockid(int blockid){
+        int index = 0;
+        for(int i=1;i<indexfileBlocks.size();i++){
+            if(indexfileBlocks.get(i).getBlockid()==blockid){
+                index = i;
+                break;
+            }
+        }
+        indexfileBlocks.remove(index);
+        indexfileBlocks.get(0).getBlockids().remove(Integer.valueOf(blockid));
     }
 
     public int getBytesOfObject(Object object){
@@ -384,17 +387,5 @@ public class FileManager {
         for(Record record : records){
             System.out.println("ID:" + record.getId() + ", Name:" + record.getName() + ", Coordinates:" + record.getCoordinates());
         }
-    }
-
-    // Returns the index of the block from the ArrayList blocks
-    public int searchBlock(int blockId) {
-        int index=0;
-        for(int i=0;i<datafileBlocks.size();i++) {
-            if(datafileBlocks.get(i).getBlockid()==blockId) {
-                index=i;
-                break;
-            }
-        }
-        return index;
     }
 }

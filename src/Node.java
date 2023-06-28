@@ -1,5 +1,6 @@
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.DoubleToIntFunction;
 
 public class Node implements Serializable{
     private ArrayList<Entry> entries;
@@ -17,6 +18,9 @@ public class Node implements Serializable{
     }
 
     public void setEntries(ArrayList<Entry> entries) {
+        for(Entry newEntry : entries){
+            newEntry.setParentNode(this);
+        }
         this.entries = entries;
     }
 
@@ -44,10 +48,13 @@ public class Node implements Serializable{
     public void setBlockid(int blockid){
         this.blockid=blockid;
     }
+
     public void showEntries() {
         for(int i=0; i<entries.size(); i++) {
+            System.out.println();
             System.out.println("Entry in index " + i +":");
             entries.get(i).showEntry();
+            System.out.println("Block ID of parent node: " + entries.get(i).getParentNode().getBlockid());
         }
     }
 
@@ -169,7 +176,6 @@ public class Node implements Serializable{
             }
             overlapsOfDifferentBoundingBoxes.put(i, overlap);
         }
-
         // convert the HashMap to a list of entries
         List<Map.Entry<Integer, Double>> entryList = new ArrayList<>(overlapsOfDifferentBoundingBoxes.entrySet());
         // sort the list based on the values (areas)
@@ -179,7 +185,6 @@ public class Node implements Serializable{
                 return entry1.getValue().compareTo(entry2.getValue());
             }
         });
-
 
         // CS2 Resolve ties by choosing the leaf/entry
         // whose rectangle needs the least area enlargement, then
@@ -195,8 +200,9 @@ public class Node implements Serializable{
             Map.Entry<Integer, Double> entry = iterator.next();
             if (!entry.getValue().equals(smallestOverlap)) {
                 iterator.remove();
+            } else {
+                sortedEntries.add(entries.get(entry.getKey()));
             }
-            sortedEntries.add(entries.get(entry.getKey()));
         }
 
         // resolve ties by calling getEntryWithTheLeastAreaEnlargement

@@ -16,11 +16,10 @@ public class Main {
 //            ui.init(args[0]);
 //        }
 
-
         // delete test
-        FileManager fileManager = new FileManager(2);
-        RAsteriskTree tree = new RAsteriskTree(2, fileManager);
-
+//        FileManager fileManager = new FileManager(2);
+//        RAsteriskTree tree = new RAsteriskTree(2, fileManager);
+//
 //        Record r1 = new Record(1, "1", new ArrayList<Double>(Arrays.asList(1.0, 1.0)));
 //        tree.insertData(r1);
 //
@@ -36,15 +35,50 @@ public class Main {
 //        Record r5 = new Record(5, "5", new ArrayList<Double>(Arrays.asList(5.0, 5.0)));
 //        tree.insertData(r5);
 //
+//        Record r6 = new Record(6, "6", new ArrayList<Double>(Arrays.asList(1.5, 1.5)));
+//        tree.insertData(r6);
+//
+//        Record r7 = new Record(7, "7", new ArrayList<Double>(Arrays.asList(1.8, 1.8)));
+//        tree.insertData(r7);
+//
+//        Record r8 = new Record(8, "8", new ArrayList<Double>(Arrays.asList(1.1, 1.1)));
+//        tree.insertData(r8);
+//
+//        Record r9  = new Record(9, "9", new ArrayList<Double>(Arrays.asList(1.21, 1.21)));
+//        tree.insertData(r9);
 //        tree.showTree();
+//
+//        ArrayList<Double> coordinates1 = new ArrayList<>();
+//        coordinates1.add(1.0);
+//        coordinates1.add(1.0);
+//        Point point1 = new Point(coordinates1);
+//        LeafEntry entry1 = new LeafEntry(0, new BoundingBox(point1, point1));
+//        tree.delete(entry1);
+//        tree.showTree();
+//
+//        ArrayList<Double> coordinates2 = new ArrayList<>();
+//        coordinates2.add(1.1);
+//        coordinates2.add(1.1);
+//        Point point2 = new Point(coordinates2);
+//        LeafEntry entry2 = new LeafEntry(0, new BoundingBox(point2, point2));
+//        tree.delete(entry2);
+//        tree.showTree();
+//
+//        fileManager.readIndexfileTest();
+//        fileManager.readDatafileTest();
 
-        ArrayList<Double> coordinates1 = new ArrayList<>();
-        coordinates1.add(1.0);
-        coordinates1.add(1.0);
-        Point point1 = new Point(coordinates1);
-        LeafEntry entry1 = new LeafEntry(0, new BoundingBox(point1, point1));
 
-        System.out.println(tree.delete(entry1));
+
+//        Record r10 = new Record(10, "10", new ArrayList<Double>(Arrays.asList(1.4, 1.4)));
+//        tree.insertData(r10);
+//        tree.showTree();
+//        ArrayList<Double> coordinates1 = new ArrayList<>();
+//        coordinates1.add(1.0);
+//        coordinates1.add(1.0);
+//        Point point1 = new Point(coordinates1);
+//        LeafEntry entry1 = new LeafEntry(0, new BoundingBox(point1, point1));
+//
+//        System.out.println(tree.delete(entry1));
 
 //        tree.showTree();
 

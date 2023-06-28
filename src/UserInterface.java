@@ -52,9 +52,11 @@ public class UserInterface {
     private void menu(){
         char choice;
         do {
-            System.out.println("type 1 to insert");
-            System.out.println("type 3 for range query");
-            System.out.println("type 5 for skyline query");
+            System.out.println("type 1 to insert a record");
+            System.out.println("type 2 to delete a record");
+            System.out.println("type 3 to perform a range query");
+            System.out.println("type 4 to find the k nearest neighbors");
+            System.out.println("type 5 to perform a skyline query");
             System.out.println("type 0 to exit");
             choice = sc.nextLine().charAt(0);
             System.out.println();
@@ -80,6 +82,14 @@ public class UserInterface {
                     BoundingBox searchBox = readRangeQueryFromUser();
                     System.out.println("search result:");
                     tree.search(searchBox, tree.getRoot());
+                    break;
+                case '4':
+                    // k nearest neighbors
+                    Point point = readCoordinatesOfPointFromUser();
+                    System.out.print("k:");
+                    int k = sc.nextInt();
+                    sc.nextLine();
+                    tree.knnQuery(point, k);
                     break;
                 case '5':
                     // skyline query
@@ -112,7 +122,7 @@ public class UserInterface {
     }
 
     public LeafEntry readRecordCoordinatesFromUser(){
-        System.out.println("Type the ID you want to delete");
+        System.out.println("Type the coordinates of the record you want to delete");
         ArrayList<Double> coordinates = new ArrayList<>();
         for(int i=1;i<=tree.getDimensions();i++){
             System.out.print("Dimension " + i + ":");
@@ -126,7 +136,6 @@ public class UserInterface {
     // implementation under construction
     public long readRecordIDFromUser(){
         System.out.println("Give the coordinates of the Record you want to delete");
-
         System.out.print("ID:");
         long id = sc.nextLong();
         sc.nextLine();
@@ -153,5 +162,17 @@ public class UserInterface {
         sc.nextLine();
         System.out.println();
         return new BoundingBox(new Point(lowerLeft), new Point(upperRight));
+    }
+
+    public Point readCoordinatesOfPointFromUser(){
+        System.out.println("Type the coordinates of the point");
+        ArrayList<Double> coordinates = new ArrayList<>();
+        for(int i=1;i<=tree.getDimensions();i++){
+            System.out.print("Dimension " + i + ":");
+            double value = sc.nextDouble();
+            coordinates.add(value);
+        }
+        sc.nextLine();
+        return new Point(coordinates);
     }
 }
