@@ -17,30 +17,16 @@ public class UserInterface {
 
     private void startUp(String dimensions){
         fileManager = new FileManager(Integer.parseInt(dimensions));
-        tree = new RAsteriskTree(Integer.parseInt(dimensions), fileManager);
-        if (fileManager.datafileExists() || fileManager.indexfileExists()) {
+        if (fileManager.datafileExists() && fileManager.indexfileExists()) {
             System.out.println("datafile and indexfile found\n" +
-                    "keep it: y\n" +
-                    "delete and create new: n");
-
+                    "keep: y\n" +
+                    "delete: n");
             char choice = sc.nextLine().charAt(0);
-//            char choice = 'y';
             if (choice=='y'){
 
             }else if (choice=='n'){
-//                fileManager.deleteDatafile();
-//                fileManager.deleteIndexfile();
-                OSMToCSV oc = new OSMToCSV();
-                oc.searchOSMFiles(resourcesDirectoryPath);
-                List<File> csvFiles = fileManager.getCSVFiles(resourcesDirectoryPath);
-                if (!csvFiles.isEmpty()) {
-                    for (int i=0;i<csvFiles.size();i++) {
-                        System.out.println(csvFiles.get(i).getName() + ":" + i);
-                    }
-                    System.out.print("bulk loading from file:");
-                    int index = sc.nextInt();
-                    tree.bulkLoading(csvFiles.get(index).getAbsolutePath());
-                }
+                fileManager.deleteDatafile();
+                fileManager.deleteIndexfile();
             }else {
                 System.out.println("invalid input");
                 System.exit(0);
@@ -50,6 +36,7 @@ public class UserInterface {
     }
 
     private void menu(){
+        tree = new RAsteriskTree(fileManager.getDimensions(), fileManager);
         char choice;
         do {
             System.out.println("type 1 to insert a record");
@@ -57,10 +44,10 @@ public class UserInterface {
             System.out.println("type 3 to perform a range query");
             System.out.println("type 4 to find the k nearest neighbors");
             System.out.println("type 5 to perform a skyline query");
+            System.out.println("type 6 to perform bulk loading");
             System.out.println("type 0 to exit");
             choice = sc.nextLine().charAt(0);
             System.out.println();
-//            choice = '1';
             switch (choice) {
                 case '0':
                     System.out.println("that's all folks!");
@@ -89,13 +76,33 @@ public class UserInterface {
                     System.out.print("k:");
                     int k = sc.nextInt();
                     sc.nextLine();
-//                    tree.knnQuery(tree.getRoot(), point, k);
+                    tree.knnQuery(tree.getRoot(), point, k, null);
                     break;
                 case '5':
                     // skyline query
                     System.out.println("skyline result:");
                     tree.branchAndBoundSkyline();
                     break;
+                case '6':
+                    if (fileManager.datafileExists()) {
+                        System.out.println("datafile and indexfile must be deleted before performing bulk loading");
+                    } else {
+                        OSMToCSV oc = new OSMToCSV();
+                        oc.searchOSMFiles(resourcesDirectoryPath);
+                        List<File> csvFiles = fileManager.getCSVFiles(resourcesDirectoryPath);
+                        if (!csvFiles.isEmpty()) {
+                            for (int i=0;i<csvFiles.size();i++) {
+                                System.out.println(csvFiles.get(i).getName() + ":" + i);
+                            }
+                            int index;
+                            do {
+                                System.out.print("bulk loading from file: ");
+                                index = sc.nextInt();
+                                sc.nextLine();
+                            } while (index < 0 || index >= csvFiles.size());
+                            tree.bulkLoading(csvFiles.get(index).getAbsolutePath());
+                        }
+                    }
                 default:
                     System.out.println("try again");
                     break;
@@ -131,15 +138,6 @@ public class UserInterface {
         }
         sc.nextLine();
         return new LeafEntry(0, new BoundingBox(new Point(coordinates), new Point(coordinates)));
-    }
-
-    // implementation under construction
-    public long readRecordIDFromUser(){
-        System.out.println("Give the coordinates of the Record you want to delete");
-        System.out.print("ID:");
-        long id = sc.nextLong();
-        sc.nextLine();
-        return id;
     }
 
     public BoundingBox readRangeQueryFromUser(){

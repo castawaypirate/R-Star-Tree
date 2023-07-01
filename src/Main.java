@@ -1,3 +1,4 @@
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -16,10 +17,17 @@ public class Main {
 //            ui.init(args[0]);
 //        }
 
+        // bulk loading testing
+        FileManager fileManager = new FileManager(2);
+        RAsteriskTree tree = new RAsteriskTree(fileManager.getDimensions(), fileManager);
+
+        tree.bulkLoading(String.valueOf(fileManager.getCSVFiles(".\\resources\\").get(0)));
+
+
         //knn test
 
-        FileManager fileManager = new FileManager(2);
-        RAsteriskTree tree = new RAsteriskTree(2, fileManager);
+//        FileManager fileManager = new FileManager(2);
+//        RAsteriskTree tree = new RAsteriskTree(2, fileManager);
 
 //        Record r1 = new Record(1, "1", new ArrayList<Double>(Arrays.asList(1.0, 1.0)));
 //        tree.insertData(r1);
@@ -48,13 +56,13 @@ public class Main {
 //        Record r9  = new Record(9, "9", new ArrayList<Double>(Arrays.asList(1.21, 1.21)));
 //        tree.insertData(r9);
 
-        tree.showTree();
-
-        ArrayList<Double> coordinates2 = new ArrayList<>();
-        coordinates2.add(1.0);
-        coordinates2.add(1.0);
-        Point point2 = new Point(coordinates2);
-        tree.knnQuery(tree.getRoot(), point2, 1, null);
+//        tree.showTree();
+//
+//        ArrayList<Double> coordinates2 = new ArrayList<>();
+//        coordinates2.add(1.0);
+//        coordinates2.add(1.0);
+//        Point point2 = new Point(coordinates2);
+//        tree.knnQuery(tree.getRoot(), point2, 1, null);
 //
 //        ArrayList<Double> coordinates3 = new ArrayList<>();
 //        coordinates3.add(2.0);

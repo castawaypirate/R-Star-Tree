@@ -24,7 +24,7 @@ public class RAsteriskTree {
         M = fileManager.getMaxNumberOfEntriesInBlock();
         // 40% of M best performance
         m = Math.max((int) Math.floor(0.4 * M), 1);
-        m=2;
+//        m=2;
         // 30% of M best performance
         reinsert_p = Math.max((int) Math.floor(0.3 * M), 1);
     }
@@ -66,7 +66,13 @@ public class RAsteriskTree {
     public void bulkLoading(String CSVfilePath){
         // must do or the entries must be sorted, only time will tell
         // look the recordings for clues for the bulk loading
-        System.out.println(CSVfilePath);
+//        System.out.println(CSVfilePath);
+       ArrayList<Record> records = fileManager.readDataFromCSVFile(CSVfilePath);
+       int count = 0;
+       for(Record record : records) {
+           insertData(record);
+           System.out.println(count++);
+       }
 //        insertData(new Record(632980450, "632980450", new ArrayList<Double>(Arrays.asList(41.5448493,26.5947027))));
 //        ArrayList<Record> sortedRecords = fileManager.readDataFromCSVFile(CSVfilePath);
 //        fileManager.writeToDatafile(sortedRecords);

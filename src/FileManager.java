@@ -17,15 +17,19 @@ public class FileManager {
         this.dimensions=dimensions;
         this.datafileBlocks=new ArrayList<>();
         this.indexfileBlocks=new ArrayList<>();
-//        maxNumberOfRecordsInBlock = computeMaximumNumberOfRecordsInABlock();
-//        maxNumberOfEntriesInBlock = computeMaximumNumberOfEntriesInABlock();
-        maxNumberOfRecordsInBlock = 4;
-        maxNumberOfEntriesInBlock = 4;
+        maxNumberOfRecordsInBlock = computeMaximumNumberOfRecordsInABlock();
+        maxNumberOfEntriesInBlock = computeMaximumNumberOfEntriesInABlock();
+//        maxNumberOfRecordsInBlock = 4;
+//        maxNumberOfEntriesInBlock = 4;
+    }
+
+    public int getDimensions() {
+        return dimensions;
     }
 
     public Node getRoot() {
         if(!indexfileExists()) {
-            System.out.println("initialize indexfile.dat");
+//            System.out.println("initialize indexfile.dat");
             createIndexfile();
         }
         readIndexfile();
@@ -196,7 +200,7 @@ public class FileManager {
 
     public void writeRecordToDatafile(Record record){
         if(!datafileExists()) {
-            System.out.println("initialize datafile.dat");
+//            System.out.println("initialize datafile.dat");
             createDatafile();
         }
         readDatafile();
