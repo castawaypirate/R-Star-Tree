@@ -518,10 +518,11 @@ public class RAsteriskTree {
         }
     }
 
+    // Algorithm Branch and Bound Skyline
     public void branchAndBoundSkyline(){
         // list of skyline points
         ArrayList<LeafEntry> skyline = new ArrayList<>();
-        MinHeap<Entry> minHeap = new MinHeap<>();
+        MinMaxHeap<Entry> minHeap = new MinMaxHeap<>(false);
         // initialize origin
         ArrayList<Double> originCoordinates = new ArrayList<>();
         for(int i=0;i<dimensions;i++) {
@@ -570,8 +571,48 @@ public class RAsteriskTree {
         }
     }
 
-    public void knnQuery(Point point, int k){
-
+    // Algorithm K Nearest Neighbors
+    public void knnQuery(Node node, Point point, int k, MinMaxHeap<Entry> nearest){
+        // initialize nearest
+        if (nearest == null) {
+            nearest = new MinMaxHeap<>(true, k);
+        }
+        // add all root entries to active branch
+        MinMaxHeap<Entry> activeBranchList = new MinMaxHeap<>(false);
+        for(Entry entry : node.getEntries()) {
+            activeBranchList.addObject(entry, point.computeMinDistanceFromBoundingBox(entry.getBoundingBox()));
+        }
+        // while active branch list is not empty
+        while(!activeBranchList.getSortedEntries().isEmpty()) {
+            // remove top entry
+            Entry entryToCheck = activeBranchList.getFirstElement().getKey();
+            double distance = activeBranchList.getFirstElement().getValue();
+            activeBranchList.getSortedEntries().remove(0);
+            // if nearest is empty our guess for the nearest neighbor distances is infinity
+            double neighborDistance = Double.MAX_VALUE;
+            if (!nearest.getSortedEntries().isEmpty()){
+                // in case nearest hasn't found k neighbors yet
+                if (!(nearest.getSortedEntries().size()<k)){
+                    neighborDistance = nearest.getFirstElement().getValue();
+                }
+            }
+            if(distance < neighborDistance) {
+                // if entryToCheck is not a leaf entry
+                if(!(entryToCheck instanceof LeafEntry)) {
+                    for(Entry childEntry : entryToCheck.getChildNode().getEntries()) {
+                        // add all child entries of the child node to active branch list
+                        activeBranchList.addObject(childEntry, point.computeMinDistanceFromBoundingBox(childEntry.getBoundingBox()));
+                    }
+                } else { // entryToCheck if a leaf entry add it to nearest
+                    nearest.addObject(entryToCheck, point.computeMinDistanceFromBoundingBox(entryToCheck.getBoundingBox()));
+                }
+            }
+        }
+        System.out.println("Nearest neighbors for k=" + k + ": ");
+        for (Map.Entry<Entry, Double> entry : nearest.getSortedEntries()){
+            entry.getKey().showEntry();
+            System.out.println("Distance: " + entry.getValue());
+        }
     }
 }
 
@@ -593,28 +634,65 @@ class Pair<T1, T2> {
     }
 }
 
-
-class MinHeap<T> {
+class MinMaxHeap<T> {
     private List<Map.Entry<T, Double>> sortedEntries;
+    private boolean isMaxHeap;
+    private int maxEntries;
 
-    public MinHeap() {
+    public MinMaxHeap(boolean isMaxHeap) {
+        this(isMaxHeap, 0);
+    }
+
+    public MinMaxHeap(boolean isMaxHeap, int maxEntries) {
+        this.isMaxHeap = isMaxHeap;
+        this.maxEntries = maxEntries;
         sortedEntries = new ArrayList<>();
     }
 
     public void addObject(T object, double value) {
-        Map.Entry<T, Double> newEntry = new AbstractMap.SimpleEntry<>(object, value);
-        sortedEntries.add(newEntry);
-
-        // Sort the entries based on their values
-        Collections.sort(sortedEntries, new Comparator<Map.Entry<T, Double>>() {
-            @Override
-            public int compare(Map.Entry<T, Double> entry1, Map.Entry<T, Double> entry2) {
-                return entry1.getValue().compareTo(entry2.getValue());
+        boolean insert = false;
+        if (maxEntries > 0) {
+            if (sortedEntries.size() >= maxEntries) {
+                if (value < sortedEntries.get(0).getValue()) {
+                    sortedEntries.remove(0);
+                    insert = true;
+                }
+            } else {
+                insert = true;
             }
-        });
+        } else {
+            insert = true;
+        }
+        if (insert) {
+            Map.Entry<T, Double> newEntry = new AbstractMap.SimpleEntry<>(object, value);
+            sortedEntries.add(newEntry);
+
+            // sort the entries based on their values and heap type
+            Collections.sort(sortedEntries, new Comparator<Map.Entry<T, Double>>() {
+                @Override
+                public int compare(Map.Entry<T, Double> entry1, Map.Entry<T, Double> entry2) {
+                    int result = entry1.getValue().compareTo(entry2.getValue());
+                    return isMaxHeap ? -result : result;
+                }
+            });
+        }
     }
 
     public List<Map.Entry<T, Double>> getSortedEntries() {
         return sortedEntries;
+    }
+
+    public Map.Entry<T, Double> getFirstElement() {
+        if (sortedEntries.isEmpty()) {
+            return null; // handle empty heap case
+        }
+        return sortedEntries.get(0);
+    }
+
+    public Map.Entry<T, Double> getLastElement() {
+        if (sortedEntries.isEmpty()) {
+            return null; // handle empty heap case
+        }
+        return sortedEntries.get(sortedEntries.size() - 1);
     }
 }

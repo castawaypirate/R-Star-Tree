@@ -89,7 +89,7 @@ public class UserInterface {
                     System.out.print("k:");
                     int k = sc.nextInt();
                     sc.nextLine();
-                    tree.knnQuery(point, k);
+//                    tree.knnQuery(tree.getRoot(), point, k);
                     break;
                 case '5':
                     // skyline query

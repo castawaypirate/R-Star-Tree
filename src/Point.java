@@ -100,4 +100,33 @@ public class Point implements Serializable{
         return new Point(upperCoordinates);
     }
 
+    public Double computeMinDistanceFromBoundingBox(BoundingBox incomingBox) {
+        if (getPointDimensions() != incomingBox.getLowerLeft().getPointDimensions() || getPointDimensions() != incomingBox.getUpperRight().getPointDimensions()) {
+            throw new IllegalArgumentException("point dimensions must match the dimensions of the bounding box");
+        }
+
+        for (int i = 0; i < getPointDimensions(); i++) {
+            double coord = getCoordinates().get(i);
+            double lower = incomingBox.getLowerLeft().getCoordinates().get(i);
+            double upper = incomingBox.getUpperRight().getCoordinates().get(i);
+
+            if (coord < lower || coord > upper) {
+                double minDistance = 0.0;
+                for (int j = 0; j < getPointDimensions(); j++) {
+                    double currentCoord = getCoordinates().get(j);
+                    double currentLower = incomingBox.getLowerLeft().getCoordinates().get(j);
+                    double currentUpper = incomingBox.getUpperRight().getCoordinates().get(j);
+
+                    if (currentCoord < currentLower) {
+                        minDistance += Math.pow(currentLower - currentCoord, 2);
+                    } else if (currentCoord > currentUpper) {
+                        minDistance += Math.pow(currentCoord - currentUpper, 2);
+                    }
+                }
+                return Math.sqrt(minDistance);
+            }
+        }
+
+        return 0.0; // point is inside the bounding box
+    }
 }

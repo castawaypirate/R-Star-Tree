@@ -188,7 +188,6 @@ public class BoundingBox implements Serializable{
                 return false; // value in at least one dimension does not match
             }
         }
-
         return true;
     }
 

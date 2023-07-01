@@ -16,6 +16,60 @@ public class Main {
 //            ui.init(args[0]);
 //        }
 
+        //knn test
+
+        FileManager fileManager = new FileManager(2);
+        RAsteriskTree tree = new RAsteriskTree(2, fileManager);
+
+//        Record r1 = new Record(1, "1", new ArrayList<Double>(Arrays.asList(1.0, 1.0)));
+//        tree.insertData(r1);
+//
+//        Record r2 = new Record(2, "2", new ArrayList<Double>(Arrays.asList(2.0, 2.0)));
+//        tree.insertData(r2);
+//
+//        Record r3 = new Record(3, "3", new ArrayList<Double>(Arrays.asList(3.0, 3.0)));
+//        tree.insertData(r3);
+//
+//        Record r4 = new Record(4, "4", new ArrayList<Double>(Arrays.asList(4.0, 4.0)));
+//        tree.insertData(r4);
+//
+//        Record r5 = new Record(5, "5", new ArrayList<Double>(Arrays.asList(5.0, 5.0)));
+//        tree.insertData(r5);
+
+//        Record r6 = new Record(6, "6", new ArrayList<Double>(Arrays.asList(1.5, 1.5)));
+//        tree.insertData(r6);
+//
+//        Record r7 = new Record(7, "7", new ArrayList<Double>(Arrays.asList(1.8, 1.8)));
+//        tree.insertData(r7);
+//
+//        Record r8 = new Record(8, "8", new ArrayList<Double>(Arrays.asList(1.1, 1.1)));
+//        tree.insertData(r8);
+//
+//        Record r9  = new Record(9, "9", new ArrayList<Double>(Arrays.asList(1.21, 1.21)));
+//        tree.insertData(r9);
+
+        tree.showTree();
+
+        ArrayList<Double> coordinates2 = new ArrayList<>();
+        coordinates2.add(1.0);
+        coordinates2.add(1.0);
+        Point point2 = new Point(coordinates2);
+        tree.knnQuery(tree.getRoot(), point2, 1, null);
+//
+//        ArrayList<Double> coordinates3 = new ArrayList<>();
+//        coordinates3.add(2.0);
+//        coordinates3.add(2.0);
+//        Point point3 = new Point(coordinates3);
+//        BoundingBox box = new BoundingBox(point2, point3);
+//
+//
+//        ArrayList<Double> coordinates4 = new ArrayList<>();
+//        coordinates4.add(2.0);
+//        coordinates4.add(1.5);
+//        Point point4 = new Point(coordinates4);
+//        System.out.println(point4.computeMinDistanceFromBoundingBox(box));
+
+
         // delete test
 //        FileManager fileManager = new FileManager(2);
 //        RAsteriskTree tree = new RAsteriskTree(2, fileManager);
