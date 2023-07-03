@@ -50,7 +50,7 @@ public class UserInterface {
             System.out.println();
             switch (choice) {
                 case '0':
-                    System.out.println("that's all folks!");
+                    System.out.println("terminate program");
                     break;
                 case '1':
                     // insert record
@@ -61,7 +61,7 @@ public class UserInterface {
                     // delete record
                     LeafEntry leafEntry = readRecordCoordinatesFromUser();
                     if(tree.delete(leafEntry)) {
-                        System.out.println("Record was deleted successfully");
+                        System.out.println("record was deleted successfully");
                     }
                     break;
                 case '3':
@@ -101,6 +101,7 @@ public class UserInterface {
                                 sc.nextLine();
                             } while (index < 0 || index >= csvFiles.size());
                             tree.bulkLoading(csvFiles.get(index).getAbsolutePath());
+                            System.out.println("bulk loading done");
                         }
                     }
                     break;

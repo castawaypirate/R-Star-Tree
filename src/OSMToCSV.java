@@ -24,21 +24,21 @@ public class OSMToCSV {
 
     public void searchOSMFiles(String directoryPath) {
         File directory = new File(directoryPath);
-        // Check if the provided directory path is valid
+        // check if the provided directory path is valid
         if (!directory.isDirectory()) {
             System.out.println("invalid directory path: " + directoryPath);
             return;
         }
-        // Get all files and subdirectories inside the directory
+        // get all files and subdirectories inside the directory
         File[] files = directory.listFiles();
 
         if (files != null) {
             for (File file : files) {
                 if (file.isDirectory()) {
-                    // Recursive call for subdirectories
+                    // recursive call for subdirectories
                     searchOSMFiles(file.getAbsolutePath());
                 } else {
-                    // Check if the file has the desired extension
+                    // check if the file has the desired extension
                     String fileName = file.getName();
                     if (fileName.endsWith(".osm")) {
                         OSMFilePath = file.getAbsolutePath();

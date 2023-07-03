@@ -24,7 +24,6 @@ public class RAsteriskTree {
         M = fileManager.getMaxNumberOfEntriesInBlock();
         // 40% of M best performance
         m = Math.max((int) Math.floor(0.4 * M), 1);
-//        m=2;
         // 30% of M best performance
         reinsert_p = Math.max((int) Math.floor(0.3 * M), 1);
     }

@@ -20,8 +20,6 @@ public class FileManager {
         this.indexfileBlocks=new ArrayList<>();
         maxNumberOfRecordsInBlock = computeMaximumNumberOfRecordsInABlock();
         maxNumberOfEntriesInBlock = computeMaximumNumberOfEntriesInABlock();
-//        maxNumberOfRecordsInBlock = 3;
-//        maxNumberOfEntriesInBlock = 3;
     }
 
     public int getDimensions() {
@@ -130,41 +128,6 @@ public class FileManager {
             indexfileBlocks = (ArrayList<IndexBlock>) objectInputStream.readObject();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
-        }
-    }
-
-    public void readIndexfileTest() {
-        try (FileInputStream fileInputStream = new FileInputStream(pathToIndexfile);
-             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
-            indexfileBlocks = (ArrayList<IndexBlock>) objectInputStream.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        for(IndexBlock block : indexfileBlocks) {
-            System.out.println();
-            System.out.println("-----------------------------------");
-            System.out.println("IndexBlock ID: " + block.getBlockid());
-            System.out.println("-----------------------------------");
-            if(block.getNodeOfBlock()!=null){
-                block.getNodeOfBlock().showEntries();
-                System.out.println("-----------------------------------");
-            }
-        }
-    }
-
-    public void readDatafileTest() {
-        try (FileInputStream fileInputStream = new FileInputStream(pathToDatafile);
-             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
-            datafileBlocks = (ArrayList<DataBlock>) objectInputStream.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        for(DataBlock block : datafileBlocks) {
-            System.out.println();
-            if(!block.getRecords().isEmpty()){
-                block.showRecordsInBlock();
-                System.out.println("-----------------------------------");
-            }
         }
     }
 

@@ -1,7 +1,6 @@
 import java.util.ArrayList;
 
 public class DataBlock extends Block{
-
     private int numberOfRecordsInsideDatafile;
     private ArrayList<Record> records;
     public DataBlock(int blockid, String blockname) {

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 public class Block implements Serializable{
     private final int blockid;
     private final String blockname;
-
     private ArrayList<Integer> blockids;
 
     public Block(int blockid, String blockname){

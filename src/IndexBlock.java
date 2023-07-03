@@ -8,7 +8,6 @@ public class IndexBlock extends Block{
         node.setBlockid(this.getBlockid());
         this.nodeOfBlock=node;
     }
-
     public Node getNodeOfBlock() {
         return nodeOfBlock;
     }
