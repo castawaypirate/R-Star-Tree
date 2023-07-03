@@ -52,7 +52,7 @@ public class RAsteriskTree {
             for (Entry entry : node.getEntries()) {
                 if (entry instanceof LeafEntry) {
                     LeafEntry leafEntry = (LeafEntry) entry;
-                    System.out.println(indent + "Leaf Entry: Record ID: " + leafEntry.getLeafEntryId());
+                    System.out.println(indent + "Record ID: " + leafEntry.getLeafEntryId() + ", Coordinates: " + entry.getBoundingBox().getLowerLeft().getCoordinates());
                 } else {
                     Node childNode = entry.getChildNode();
                     System.out.println(indent + "Index Node: ");
@@ -64,18 +64,162 @@ public class RAsteriskTree {
     }
 
     public void bulkLoading(String CSVfilePath){
-        // must do or the entries must be sorted, only time will tell
-        // look the recordings for clues for the bulk loading
-//        System.out.println(CSVfilePath);
-       ArrayList<Record> records = fileManager.readDataFromCSVFile(CSVfilePath);
-       int count = 0;
-       for(Record record : records) {
-           insertData(record);
-           System.out.println(count++);
-       }
-//        insertData(new Record(632980450, "632980450", new ArrayList<Double>(Arrays.asList(41.5448493,26.5947027))));
-//        ArrayList<Record> sortedRecords = fileManager.readDataFromCSVFile(CSVfilePath);
-//        fileManager.writeToDatafile(sortedRecords);
+        // read records from csv file into a hashmap
+        // where key is the id and value is the record
+        HashMap<Long, Record> records = fileManager.readDataFromCSVFile(CSVfilePath);
+        ArrayList<Node> nodes = new ArrayList<>();
+        // Map P(records) in the rank space
+        ArrayList<Record> rankedRecords = rankRecords(records);
+        HashMap<Record, Integer> zOrderMap = new HashMap<>();
+        for(Record rankedRecord : rankedRecords) {
+            zOrderMap.put(rankedRecord, computeZOrderValue(rankedRecord));
+        }
+        // Sort P(rankedRecords) in ascending order of the Z-order values
+        List<Map.Entry<Record, Integer>> zOrderList = new ArrayList<>(zOrderMap.entrySet());
+        zOrderList.sort(Map.Entry.comparingByValue());
+        // add create leaf entries and add them to nodes
+        int count = 0;
+        ArrayList<Node> Q = new ArrayList<>();
+        Q.add(new Node(leafLevel));
+        for (Map.Entry<Record, Integer> rankedRecordEntry : zOrderList) {
+            // for every M entries create a new node to add entries
+            if(count==M-1) {
+                Q.add(new Node(leafLevel));
+                count=0;
+            }
+            // find inside the hashmap the corresponding record using the id of the ranked/sorted records
+            Q.get(Q.size()-1)
+                    .addEntry(new LeafEntry(records.get(rankedRecordEntry.getKey().getId()).getId(),
+                              new BoundingBox(new Point(records.get(rankedRecordEntry.getKey().getId()).getCoordinates()),
+                                              new Point(records.get(rankedRecordEntry.getKey().getId()).getCoordinates()))));
+            count++;
+        }
+
+        nodes.addAll(Q);
+        while (Q.size() > 1) {
+            List<Node> dequeuedNodes = new ArrayList<>();
+            int level = -1;
+            // dequeue the first M nodes
+            for (int i = 0; i < M - 1; i++) {
+                if (!(i>=Q.size())) {
+                    dequeuedNodes.add(Q.get(i));
+                    if (level == -1) {
+                        level = Q.get(i).getLevel();
+                    }
+                } else {
+                    break;
+                }
+            }
+            // remove nodes from Q
+            for(Node node : dequeuedNodes){
+                Q.remove(node);
+            }
+            // create new node
+            Node newNode = new Node(level + 1);
+            for (Node node : dequeuedNodes) {
+                // create entries for each node and add them
+                // to the new node of the upper level
+                Entry entry = new Entry(node);
+                newNode.addEntry(entry);
+            }
+            // add new node to Q
+            Q.add(newNode);
+            nodes.add(newNode);
+        }
+        // set root
+        Q.get(Q.size()-1).setBlockid(1);
+        root = Q.get(Q.size()-1);
+        rootLevel = root.getLevel();
+        // write to datafile and indexfile
+        fileManager.writeRecordsToDatafile(records);
+        fileManager.writeNodesToIndexfile(nodes);
+    }
+
+    public int computeZOrderValue(Record record) {
+        ArrayList<int[]> binary = new ArrayList<>();
+        // covert the coordinate of each dimension to 32-bit integer
+        for (int i = 0; i < dimensions; i++) {
+            binary.add(convertToBinaryArray(record.getCoordinates().get(i).intValue()));
+        }
+        int[] zOrderValue = new int[32 * dimensions];
+        int index = 0;
+        // iterate over each bit position
+        for (int bitPosition = 0; bitPosition < 32; bitPosition++) {
+            // iterate over each dimension
+            for (int dim = 0; dim < dimensions; dim++) {
+                int[] binaryArray = binary.get(dim);
+                if (bitPosition < binaryArray.length) {
+                    // get the bit value at the current bit position
+                    int bitValue = binaryArray[bitPosition];
+                    // set the corresponding bit in the zOrderValue array
+                    zOrderValue[index++] = bitValue;
+                }
+            }
+        }
+        int zOrderInteger = 0;
+        for (int i = 0; i < zOrderValue.length; i++) {
+            zOrderInteger = (zOrderInteger << 1) | zOrderValue[i];
+        }
+        return zOrderInteger;
+    }
+
+    public int[] convertToBinaryArray(int number) {
+        int[] binaryArray = new int[32]; // assuming a 32-bit integer
+        for (int i = 31; i >= 0; i--) {
+            binaryArray[i] = number & 1; // get the least significant bit
+            number >>= 1; // right shift the number by 1 bit
+        }
+        return binaryArray;
+    }
+
+
+    public ArrayList<Record> rankRecords(HashMap<Long, Record> records) {
+        // create new list for storing the ranked records
+        ArrayList<Record> rankRecords = new ArrayList<>(records.size());
+        for(Record record : records.values()) {
+            rankRecords.add(new Record(record.getId(), record.getName(), dimensions));
+        }
+        int recordCount = rankRecords.size();
+        // preallocate memory for the rankings array
+        int[][] rankings = new int[recordCount][dimensions];
+        // create a map to store record indices for efficient lookup
+        HashMap<Long, Integer> recordIndexMap = new HashMap<>(recordCount);
+        // fill the record index map
+        int count = 0;
+        for(Record record : records.values()) {
+            recordIndexMap.put(record.getId(), count);
+            count++;
+        }
+        // iterate over each dimension
+        for (int i = 0; i < dimensions; i++) {
+            // create a map to store rankings for the current dimension
+            HashMap<Long, Double> dimensionRank = new HashMap<>(recordCount);
+            // populate the dimensionRank map with record IDs and their respective coordinate values
+            for(Record record : records.values()) {
+                dimensionRank.put(record.getId(), record.getCoordinates().get(i));
+            }
+            // convert the dimensionRank map to a list of entries and sort it based on coordinate values
+            List<Map.Entry<Long, Double>> entryList = new ArrayList<>(dimensionRank.entrySet());
+            entryList.sort(Map.Entry.comparingByValue());
+            int rank = 0;
+            double previousValue = Double.NEGATIVE_INFINITY;
+            // iterate over the sorted entry list and assign ranks to records
+            for (Map.Entry<Long, Double> entry : entryList) {
+                double currentValue = entry.getValue();
+                if (currentValue != previousValue) {
+                    previousValue = currentValue;
+                }
+                int recordIndex = recordIndexMap.get(entry.getKey());
+                rankings[recordIndex][i] = rank;
+                rank++;
+            }
+            // update the coordinate values of the records in the rankRecords list
+            for (Record record : rankRecords) {
+                int recordIndex = recordIndexMap.get(record.getId());
+                record.setCoordinateInDimension(i, rankings[recordIndex][i]);
+            }
+        }
+        return rankRecords;
     }
 
     // Takes a record as a parameter, makes a leaf entry out of it

@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -19,8 +20,8 @@ public class FileManager {
         this.indexfileBlocks=new ArrayList<>();
         maxNumberOfRecordsInBlock = computeMaximumNumberOfRecordsInABlock();
         maxNumberOfEntriesInBlock = computeMaximumNumberOfEntriesInABlock();
-//        maxNumberOfRecordsInBlock = 4;
-//        maxNumberOfEntriesInBlock = 4;
+//        maxNumberOfRecordsInBlock = 3;
+//        maxNumberOfEntriesInBlock = 3;
     }
 
     public int getDimensions() {
@@ -194,13 +195,30 @@ public class FileManager {
         blockToAdd.setNodeOfBlock(node);
     }
 
+    public void writeNodesToIndexfile(ArrayList<Node> nodes){
+        if(!indexfileExists()) {
+            createIndexfile();
+        }
+        readIndexfile();
+        // set root to block1
+        indexfileBlocks.get(1).setNodeOfBlock(nodes.get(nodes.size()-1));
+        for(int i=0;i<nodes.size()-1;i++) {
+            int indexBlockId = getUniqueId(indexfileBlocks.get(0).getBlockids());
+            IndexBlock blockToAdd = new IndexBlock(indexBlockId, "block"+indexBlockId);
+            indexfileBlocks.add(blockToAdd);
+            // add indexBlockId to blockids of block0
+            indexfileBlocks.get(0).getBlockids().add(indexBlockId);
+            blockToAdd.setNodeOfBlock(nodes.get(i));
+        }
+        writeObjectToIndexfile(indexfileBlocks);
+    }
+
     public void writeToIndexfile(){
         writeObjectToIndexfile(indexfileBlocks);
     }
 
     public void writeRecordToDatafile(Record record){
         if(!datafileExists()) {
-//            System.out.println("initialize datafile.dat");
             createDatafile();
         }
         readDatafile();
@@ -219,6 +237,26 @@ public class FileManager {
             datafileBlocks.get(0).getBlockids().add(dataBlockId);
         }
         blockToAdd.addRecordToBlock(record);
+        writeObjectToDatafile(datafileBlocks);
+    }
+
+    public void writeRecordsToDatafile(HashMap<Long, Record> records){
+        if(!datafileExists()) {
+//            System.out.println("initialize datafile.dat");
+            createDatafile();
+        }
+        readDatafile();
+        DataBlock block = datafileBlocks.get(1);
+        for(Record record : records.values()) {
+            if(block.getNumberOfRecordsInsideBlock()<maxNumberOfRecordsInBlock) {
+                block.addRecordToBlock(record);
+            } else {
+                int dataBlockId = getUniqueId(datafileBlocks.get(0).getBlockids());
+                block = new DataBlock(dataBlockId, "block"+dataBlockId);
+                datafileBlocks.add(block);
+                block.addRecordToBlock(record);
+            }
+        }
         writeObjectToDatafile(datafileBlocks);
     }
 
@@ -367,8 +405,8 @@ public class FileManager {
         return csvFiles;
     }
 
-    public ArrayList<Record> readDataFromCSVFile(String CSVFilePath){
-        ArrayList<Record> records = new ArrayList<>();
+    public HashMap<Long, Record> readDataFromCSVFile(String CSVFilePath){
+        HashMap<Long, Record> records = new HashMap<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(CSVFilePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -377,7 +415,7 @@ public class FileManager {
                 for(int i=1;i<row.length;i++){
                     coordinates.add(Double.parseDouble(row[i]));
                 }
-                records.add(new Record(Long.parseLong(row[0]), row[0], coordinates));
+                records.put(Long.parseLong(row[0]), new Record(Long.parseLong(row[0]), row[0], coordinates));
             }
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);

@@ -6,10 +6,20 @@ public class Record implements Serializable{
     private int blockId;
     private String name;
     private ArrayList<Double> coordinates;
+
     public Record(long id, String name, ArrayList<Double> coordinates){
         this.id=id;
         this.name=name;
         this.coordinates=coordinates;
+    }
+
+    public Record(long id, String name, int dimensions){
+        this.id=id;
+        this.name=name;
+        coordinates = new ArrayList<>();
+        for(int i=0;i<dimensions;i++) {
+            coordinates.add(-1.0);
+        }
     }
 
     public long getId() {
@@ -42,5 +52,9 @@ public class Record implements Serializable{
 
     public void setCoordinates(ArrayList<Double> coordinates) {
         this.coordinates = new ArrayList<>(coordinates);
+    }
+
+    public void setCoordinateInDimension(int dimension, double coordinate){
+        coordinates.set(dimension, coordinate);
     }
 }

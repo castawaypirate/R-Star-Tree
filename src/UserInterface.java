@@ -92,7 +92,7 @@ public class UserInterface {
                         List<File> csvFiles = fileManager.getCSVFiles(resourcesDirectoryPath);
                         if (!csvFiles.isEmpty()) {
                             for (int i=0;i<csvFiles.size();i++) {
-                                System.out.println(csvFiles.get(i).getName() + ":" + i);
+                                System.out.println(csvFiles.get(i).getName() + ": " + i);
                             }
                             int index;
                             do {
@@ -103,6 +103,12 @@ public class UserInterface {
                             tree.bulkLoading(csvFiles.get(index).getAbsolutePath());
                         }
                     }
+                    break;
+                case '7':
+                    if(tree.getRoot()!=null) {
+                        tree.showTree();
+                    }
+                    break;
                 default:
                     System.out.println("try again");
                     break;

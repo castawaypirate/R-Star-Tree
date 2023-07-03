@@ -5,7 +5,7 @@ import java.util.Arrays;
 public class Main {
     public static void main(String[] args) {
 
-        //main
+//        //main
 //        args = new String[1];
 //        args[0]="2";
 //        System.out.println("welcome");
@@ -17,18 +17,18 @@ public class Main {
 //            ui.init(args[0]);
 //        }
 
-        // bulk loading testing
+//         bulk loading testing
         FileManager fileManager = new FileManager(2);
         RAsteriskTree tree = new RAsteriskTree(fileManager.getDimensions(), fileManager);
-
-        tree.bulkLoading(String.valueOf(fileManager.getCSVFiles(".\\resources\\").get(0)));
-
+//        tree.showTree();
+//        tree.bulkLoading(String.valueOf(fileManager.getCSVFiles(".\\resources\\").get(0)));
+//
 
         //knn test
 
 //        FileManager fileManager = new FileManager(2);
 //        RAsteriskTree tree = new RAsteriskTree(2, fileManager);
-
+//
 //        Record r1 = new Record(1, "1", new ArrayList<Double>(Arrays.asList(1.0, 1.0)));
 //        tree.insertData(r1);
 //
@@ -43,7 +43,7 @@ public class Main {
 //
 //        Record r5 = new Record(5, "5", new ArrayList<Double>(Arrays.asList(5.0, 5.0)));
 //        tree.insertData(r5);
-
+//
 //        Record r6 = new Record(6, "6", new ArrayList<Double>(Arrays.asList(1.5, 1.5)));
 //        tree.insertData(r6);
 //
@@ -55,7 +55,7 @@ public class Main {
 //
 //        Record r9  = new Record(9, "9", new ArrayList<Double>(Arrays.asList(1.21, 1.21)));
 //        tree.insertData(r9);
-
+//
 //        tree.showTree();
 //
 //        ArrayList<Double> coordinates2 = new ArrayList<>();
