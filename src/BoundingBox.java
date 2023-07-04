@@ -93,7 +93,6 @@ public class BoundingBox implements Serializable{
         BoundingBox firstEntryBoundingBox = firstEntry.getBoundingBox();
         upperRight.setCoordinates(new ArrayList<>(firstEntryBoundingBox.getUpperRight().getCoordinates()));
         lowerLeft.setCoordinates(new ArrayList<>(firstEntryBoundingBox.getLowerLeft().getCoordinates()));
-
         // iterate over the remaining entries and update the upper right and lower left points
         for (int i = 1; i < entries.size(); i++) {
             BoundingBox entryBoundingBox = entries.get(i).getBoundingBox();

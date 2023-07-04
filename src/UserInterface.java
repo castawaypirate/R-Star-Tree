@@ -8,8 +8,7 @@ public class UserInterface {
     private final static String resourcesDirectoryPath = ".\\resources\\";
     Scanner sc = new Scanner(System.in);
     private RAsteriskTree tree;
-    public UserInterface(){
-    }
+    public UserInterface(){}
 
     public void init(String dimensions){
         startUp(dimensions);
@@ -37,6 +36,9 @@ public class UserInterface {
 
     private void menu(){
         tree = new RAsteriskTree(fileManager.getDimensions(), fileManager);
+        long startTime;
+        long endTime;
+        long executionTime;
         char choice;
         do {
             System.out.println("type 1 to insert a record");
@@ -45,6 +47,7 @@ public class UserInterface {
             System.out.println("type 4 to find the k nearest neighbors");
             System.out.println("type 5 to perform a skyline query");
             System.out.println("type 6 to perform bulk loading");
+            System.out.println("type 7 to see tree");
             System.out.println("type 0 to exit");
             choice = sc.nextLine().charAt(0);
             System.out.println();
@@ -68,7 +71,11 @@ public class UserInterface {
                     // range query
                     BoundingBox searchBox = readRangeQueryFromUser();
                     System.out.println("search result:");
+                    startTime = System.currentTimeMillis();
                     tree.search(searchBox, tree.getRoot());
+                    endTime = System.currentTimeMillis();
+                    executionTime = endTime - startTime;
+                    System.out.println("Execution time: " + executionTime + " milliseconds");
                     break;
                 case '4':
                     // k nearest neighbors
@@ -76,12 +83,20 @@ public class UserInterface {
                     System.out.print("k:");
                     int k = sc.nextInt();
                     sc.nextLine();
+                    startTime = System.currentTimeMillis();
                     tree.knnQuery(tree.getRoot(), point, k, null);
+                    endTime = System.currentTimeMillis();
+                    executionTime = endTime - startTime;
+                    System.out.println("Execution time: " + executionTime + " milliseconds");
                     break;
                 case '5':
                     // skyline query
                     System.out.println("skyline result:");
+                    startTime = System.currentTimeMillis();
                     tree.branchAndBoundSkyline();
+                    endTime = System.currentTimeMillis();
+                    executionTime = endTime - startTime;
+                    System.out.println("Execution time: " + executionTime + " milliseconds");
                     break;
                 case '6':
                     if (fileManager.datafileExists()) {
@@ -100,14 +115,44 @@ public class UserInterface {
                                 index = sc.nextInt();
                                 sc.nextLine();
                             } while (index < 0 || index >= csvFiles.size());
+                            startTime = System.currentTimeMillis();
                             tree.bulkLoading(csvFiles.get(index).getAbsolutePath());
+                            endTime = System.currentTimeMillis();
+                            executionTime = endTime - startTime;
                             System.out.println("bulk loading done");
+                            System.out.println("Execution time: " + executionTime + " milliseconds");
                         }
                     }
                     break;
                 case '7':
                     if(tree.getRoot()!=null) {
                         tree.showTree();
+                    }
+                    break;
+                case '8':
+                    if (fileManager.datafileExists()) {
+                        System.out.println("datafile and indexfile must be deleted before performing one by one build");
+                    } else {
+                        OSMToCSV oc = new OSMToCSV();
+                        oc.searchOSMFiles(resourcesDirectoryPath);
+                        List<File> csvFiles = fileManager.getCSVFiles(resourcesDirectoryPath);
+                        if (!csvFiles.isEmpty()) {
+                            for (int i=0;i<csvFiles.size();i++) {
+                                System.out.println(csvFiles.get(i).getName() + ": " + i);
+                            }
+                            int index;
+                            do {
+                                System.out.print("one by one build from file: ");
+                                index = sc.nextInt();
+                                sc.nextLine();
+                            } while (index < 0 || index >= csvFiles.size());
+                            startTime = System.currentTimeMillis();
+                            tree.oneByOneTreeBuild(csvFiles.get(index).getAbsolutePath());
+                            endTime = System.currentTimeMillis();
+                            executionTime = endTime - startTime;
+                            System.out.println("one by one build done");
+                            System.out.println("Execution time: " + executionTime + " milliseconds");
+                        }
                     }
                     break;
                 default:

@@ -37,9 +37,11 @@ public class RAsteriskTree {
     }
 
     public void showTree() {
-        System.out.println();
-        showNode(root, "");
-        System.out.println();
+        if(!root.getEntries().isEmpty()) {
+            System.out.println();
+            showNode(root, "");
+            System.out.println();
+        }
     }
 
     private void showNode(Node node, String indent) {
@@ -60,6 +62,18 @@ public class RAsteriskTree {
                 }
             }
         }
+    }
+
+    public void oneByOneTreeBuild(String CSVfilePath){
+        fileManager.readIndexfile();
+        HashMap<Long, Record> records = fileManager.readDataFromCSVFile(CSVfilePath);
+        int count = 0;
+        for(Record record : records.values()) {
+            insert(new LeafEntry(record.getId(), new BoundingBox(new Point(record.getCoordinates()), new Point(record.getCoordinates()))), root, leafLevel);
+            System.out.println(++count);
+        }
+        fileManager.writeToIndexfile();
+        fileManager.writeRecordsToDatafile(records);
     }
 
     public void bulkLoading(String CSVfilePath){
@@ -714,7 +728,7 @@ public class RAsteriskTree {
                 return Double.compare(x1, x2);
             }
         });
-
+        System.out.println(skyline.size());
         for(LeafEntry entry : skyline) {
             entry.showEntry();
         }

@@ -112,7 +112,9 @@ public class Node implements Serializable{
         if (parentEntry != null) {
             ArrayList<Entry> tempEntries = new ArrayList<>();
             tempEntries.addAll(entries);
-            tempEntries.add(incomingEntry);
+            if(incomingEntry!=null){
+                tempEntries.add(incomingEntry);
+            }
             BoundingBox adjustedBoundingBox = new BoundingBox();
             adjustedBoundingBox.createBoundingBoxOfEntries(tempEntries);
             parentEntry.setBoundingBox(adjustedBoundingBox);

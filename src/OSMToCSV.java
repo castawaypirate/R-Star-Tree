@@ -12,15 +12,11 @@ import java.io.IOException;
 import java.util.Map;
 
 public class OSMToCSV {
-
     private OSMParser parser = new OSMParser();
     private File OSMFile = null;
-
     private String OSMFilePath = null;
 
-    public OSMToCSV(){
-
-    }
+    public OSMToCSV(){}
 
     public void searchOSMFiles(String directoryPath) {
         File directory = new File(directoryPath);

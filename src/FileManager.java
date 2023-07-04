@@ -26,6 +26,10 @@ public class FileManager {
         return dimensions;
     }
 
+    public ArrayList<DataBlock> getDatafileBlocks() {
+        return datafileBlocks;
+    }
+
     public Node getRoot() {
         if(!indexfileExists()) {
 //            System.out.println("initialize indexfile.dat");
