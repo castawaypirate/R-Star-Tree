@@ -8,8 +8,7 @@ public class Entry implements Serializable{
     // node in which the entry is in
     private Node parentNode;
 
-    public Entry() {
-    }
+    public Entry() {}
 
     public Entry(Node node) {
         this.childNode = node;

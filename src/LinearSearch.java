@@ -47,11 +47,11 @@ public class LinearSearch {
         long endTime = System.currentTimeMillis();
         long executionTime = endTime - startTime;
         System.out.println("K Nearest Neighbors result for k=" + k + ": ");
-//        for (Map.Entry<Record, Double> entry : kNearestNeighbors) {
-//            Record record = entry.getKey();
-//            double distance = entry.getValue();
-//            System.out.println("Record ID: " + record.getId() + ", Distance: " + distance);
-//        }
+        for (Map.Entry<Record, Double> entry : kNearestNeighbors) {
+            Record record = entry.getKey();
+            double distance = entry.getValue();
+            System.out.println("Record ID: " + record.getId() + ", Distance: " + distance);
+        }
         System.out.println("Execution time: " + executionTime + " milliseconds");
     }
 }

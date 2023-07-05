@@ -4,8 +4,8 @@ import java.util.Arrays;
 public class Main {
     public static void main(String[] args) {
         //main
-        args = new String[1];
-        args[0]="2";
+//        args = new String[1];
+//        args[0]="2";
         System.out.println("welcome");
         if(args.length == 0){
             System.out.println("you need to give the number of dimensions as an argument");
