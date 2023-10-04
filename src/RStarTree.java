@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class RAsteriskTree {
+public class RStarTree {
     private FileManager fileManager;
     private int dimensions;
     // an arraylist of boolean where true is stored if overflow treatment has occurred to a level
@@ -13,7 +13,7 @@ public class RAsteriskTree {
     private int m;
     private final static int leafLevel = 1;
     private int reinsert_p;
-    public RAsteriskTree(int dimensions, FileManager fileManager){
+    public RStarTree(int dimensions, FileManager fileManager){
         this.dimensions = dimensions;
         this.fileManager = fileManager;
         // read or create root

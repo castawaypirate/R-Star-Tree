@@ -7,7 +7,7 @@ public class UserInterface {
     private FileManager fileManager;
     private final static String resourcesDirectoryPath = ".\\resources\\";
     Scanner sc = new Scanner(System.in);
-    private RAsteriskTree tree;
+    private RStarTree tree;
     public UserInterface(){}
 
     public void init(String dimensions){
@@ -35,7 +35,7 @@ public class UserInterface {
     }
 
     private void menu(){
-        tree = new RAsteriskTree(fileManager.getDimensions(), fileManager);
+        tree = new RStarTree(fileManager.getDimensions(), fileManager);
         long startTime;
         long endTime;
         long executionTime;

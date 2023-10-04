@@ -17,7 +17,7 @@ public class Main {
 
 //        //tests
 //        FileManager fileManager = new FileManager(2);
-//        RAsteriskTree tree = new RAsteriskTree(2, fileManager);
+//        RStarTree tree = new RAsteriskTree(2, fileManager);
 //        LinearSearch linearSearch = new LinearSearch(fileManager);
 //        long startTime;
 //        long endTime;
